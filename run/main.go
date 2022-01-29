@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt";
-	"gb"
+	"gb";
 )
 
-func main() {
-	test_memory()
-}
-
 func test_memory() {
+	fmt.Println("testing memory")
+
 	var key_8 uint16 = 0x1000
 	var val_8 uint8 = 32
 	var key_16 uint16 = 0x1000 + 2
@@ -22,4 +20,13 @@ func test_memory() {
 	mmu = gb.NewMemoryUnit()
 	mmu.Write_16(key_16, val_16)
 	fmt.Println("read/write 16 bit addr:", mmu.Read_16(key_16) == val_16)
+}
+
+func test_cpu() {
+	fmt.Println("testing cpu")
+}
+
+func main() {
+	test_memory()
+	test_cpu()
 }

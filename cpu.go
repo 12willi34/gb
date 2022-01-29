@@ -1,23 +1,39 @@
 package gb
 
-import ()
+import (
+)
 
-type registers struct {
-	a uint8
-	b uint8
-	c uint8
-	d uint8
-	e uint8
-	f uint8
-	g uint8
-	h uint8
-	flags uint8
-	sp uint16
-	pc uint16
+//instructions: https://gbdev.io/pandocs/CPU_Instruction_Set.html
+type Instruction struct {
+	name string
+	op uint8
+	cycles uint8
+	f_affected bool
+	params []int
 }
 
-type cpu struct {}
+type Register struct {
+	value uint16
+}
 
+func (reg Register) low() uint8 {
+	return uint8(reg.value & 0xFF)
+}
+
+func (reg Register) high() uint8 {
+	return uint8(reg.value >> 8)
+}
+
+type cpu struct {
+	af Register
+	bc Register
+	de Register
+	hl Register
+	sp Register //stack pointer
+	pc Register //program counter
+	instructions map[uint8]Instruction
+}
+
+//ToDo
 func NewCPU() cpu {
-	return cpu {}
 }
