@@ -1,6 +1,7 @@
 package gb
 
 import (
+	"fmt"
 )
 
 type Register struct {
@@ -25,10 +26,8 @@ type cpu struct {
 	Instructions map[int]Instruction
 }
 
-//ToDo
 func NewCPU() cpu {
 	res := cpu {
-		//ToDo
 		af: Register {value: 0,},
 		bc: Register {value: 0,},
 		de: Register {value: 0,},
@@ -38,4 +37,16 @@ func NewCPU() cpu {
 		Instructions: initInstructionMap(),
 	}
 	return res
+}
+
+func (c cpu) Step() {
+	c.state()
+}
+
+func (c cpu) state() {
+	fmt.Println("---cpu state---")
+	t := []Register{c.af, c.bc, c.de, c.hl, c.sp, c.pc}
+	for _, x := range t {
+		fmt.Printf("%x %x\n", x.high(), x.low())
+	}
 }
