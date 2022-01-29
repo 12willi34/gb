@@ -5,7 +5,7 @@ package gb
 //http://gameboy.mongenel.com/dmg/asmmemmap.html
 
 import (
-	"strconv";
+	//"strconv";
 	//"fmt";
 )
 
@@ -38,19 +38,12 @@ func (mmu memoryunit) Write_8(i uint16, data uint8) {
 }
 
 func (mmu memoryunit) Read_16(i uint16) uint16 {
-	if(!mmu.Finished_bios() && i <= 0xFF) {
-		var left string = strconv.FormatInt(int64(mmu.bios[i]), 2)
-		var right string = strconv.FormatInt(int64(mmu.bios[i + 1]), 2)
-		res, _ := strconv.ParseInt(left + right, 2, 16)
-		return uint16(res)
-	}
-	var left string = strconv.FormatInt(int64(mmu.addr[i]), 2)
-	var right string = strconv.FormatInt(int64(mmu.addr[i + 1]), 2)
-	res, _ := strconv.ParseInt(left + right, 2, 16)
-	return uint16(res)
+	var x []uint8 = mmu.addr
+	if(!mmu.Finished_bios() && i <= 0xFF) { x = mmu.bios }
+	return uint16((uint16(x[i])) | uint16(x[i + 1]) << 8)
 }
 
 func (mmu memoryunit) Write_16(i uint16, data uint16) {
-	mmu.addr[i] = uint8((0) | (data >> 8))
-	mmu.addr[i + 1] = uint8(data & uint16(0xFF))
+	mmu.addr[i] = uint8(data & 0xFF)
+	mmu.addr[i + 1] = uint8(data >> 8)
 }
