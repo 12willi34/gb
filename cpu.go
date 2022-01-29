@@ -1,7 +1,6 @@
 package gb
 
 import (
-	"fmt"
 )
 
 type cpu struct {}

@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	mmu = gb.NewMemoryUnit()
+	gb.NewMemoryUnit()
 }
