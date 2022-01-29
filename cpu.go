@@ -22,7 +22,7 @@ type cpu struct {
 	hl Register
 	sp Register //stack pointer
 	pc Register //program counter
-	instructions map[int]Instruction
+	Instructions map[int]Instruction
 }
 
 //ToDo
@@ -35,7 +35,7 @@ func NewCPU() cpu {
 		hl: Register {value: 0,},
 		sp: Register {value: 0,},
 		pc: Register {value: 0,},
-		instructions: initInstructionMap(),
+		Instructions: initInstructionMap(),
 	}
 	return res
 }

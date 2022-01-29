@@ -24,7 +24,10 @@ func test_memory() {
 
 func test_cpu() {
 	fmt.Println("testing cpu")
-	gb.NewCPU()
+	processor := gb.NewCPU()
+	for k := range processor.Instructions {
+		fmt.Println(k)
+	}
 }
 
 func main() {
