@@ -3,15 +3,6 @@ package gb
 import (
 )
 
-//instructions: https://gbdev.io/pandocs/CPU_Instruction_Set.html
-type Instruction struct {
-	name string
-	op uint8
-	cycles uint8
-	f_affected bool
-	params []int
-}
-
 type Register struct {
 	value uint16
 }
@@ -31,9 +22,20 @@ type cpu struct {
 	hl Register
 	sp Register //stack pointer
 	pc Register //program counter
-	instructions map[uint8]Instruction
+	instructions map[int]Instruction
 }
 
 //ToDo
 func NewCPU() cpu {
+	res := cpu {
+		//ToDo
+		af: Register {value: 0,},
+		bc: Register {value: 0,},
+		de: Register {value: 0,},
+		hl: Register {value: 0,},
+		sp: Register {value: 0,},
+		pc: Register {value: 0,},
+		instructions: initInstructionMap(),
+	}
+	return res
 }

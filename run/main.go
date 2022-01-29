@@ -24,6 +24,7 @@ func test_memory() {
 
 func test_cpu() {
 	fmt.Println("testing cpu")
+	gb.NewCPU()
 }
 
 func main() {
