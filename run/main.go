@@ -3,6 +3,7 @@ package main
 import (
 	"fmt";
 	"gb";
+	"os";
 )
 
 func test_memory() {
@@ -24,8 +25,12 @@ func test_memory() {
 
 func test_cpu() {
 	fmt.Println("testing cpu")
-	processor := gb.NewCPU()
-	processor.Step()
+	firstFile, _ := os.ReadDir("../rom/")
+	rom, _ := os.ReadFile("../rom/" + firstFile[0].Name())
+	processor := gb.NewCPU(rom)
+	for i := 0; i < 10; i++ {
+		processor.Step()
+	}
 }
 
 func main() {
