@@ -1,5 +1,7 @@
 package gb
 
+//pandocs: http://bgb.bircd.org/pandocs.htm
+
 import ()
 
 type GameBoy struct {
