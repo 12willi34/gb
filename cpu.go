@@ -35,11 +35,11 @@ type cpu struct {
 	hl Register
 	sp Register //stack pointer
 	pc Register //program counter
-	memory memoryunit
+	memory *memoryunit
 }
 
 //initial values from: https://mstojcevich.github.io/post/d-gb-emu-registers/
-func NewCPU(rom []byte) cpu {
+func NewCPU(rom []byte, mu *memoryunit) cpu {
 	res := cpu {
 		af: Register {value: 0x01B0,},
 		bc: Register {value: 0x0013,},
@@ -47,10 +47,10 @@ func NewCPU(rom []byte) cpu {
 		hl: Register {value: 0x014D,},
 		sp: Register {value: 0xFFFE,},
 		pc: Register {value: 0x0100,},
-		memory: NewMemoryUnit(),
+		memory: mu,
 	}
 	for i := 0; i < len(rom); i++ {
-		res.memory.Write_8(uint16(i), rom[i])
+		(*res.memory).Write_8(uint16(i), rom[i])
 	}
 	return res
 }
@@ -92,13 +92,13 @@ func (this *cpu) state() {
 }
 
 func (this *cpu) popStack() uint16 {
-	x := this.memory.Read_16(this.sp.value)
+	x := (*this.memory).Read_16(this.sp.value)
 	this.sp.value += 2
 	return x
 }
 
 func (this *cpu) fetch() uint8 {
-	op := (*this).memory.Read_8(this.pc.value)
+	op := (*this.memory).Read_8(this.pc.value)
 	(*this).pc.value += 1
 	return op
 }
@@ -129,10 +129,10 @@ func (this *cpu) Step() {
 		break
 	case 0xe0:
 		i := 0xff00 + uint16(this.fetch())
-		this.memory.Write_8(i, this.af.r_high())
+		(*this.memory).Write_8(i, this.af.r_high())
 		break
 	case 0xf0:
-		a := this.memory.Read_8(0xFF00 + uint16(this.fetch()))
+		a := (*this.memory).Read_8(0xFF00 + uint16(this.fetch()))
 		this.af.w_high(a)
 		break
 	case 0xfe:
@@ -141,5 +141,4 @@ func (this *cpu) Step() {
 	default:
 		fmt.Printf("opcode not implemented: %x\n", op)
 	}
-	//this.state()
 }
