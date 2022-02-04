@@ -36,6 +36,7 @@ type cpu struct {
 	sp Register //stack pointer
 	pc Register //program counter
 	memory *memoryunit
+  Interrupt bool
 }
 
 //initial values from: https://mstojcevich.github.io/post/d-gb-emu-registers/
@@ -48,6 +49,7 @@ func NewCPU(rom []byte, mu *memoryunit) cpu {
 		sp: Register {value: 0xFFFE,},
 		pc: Register {value: 0x0100,},
 		memory: mu,
+    Interrupt: false,
 	}
 	for i := 0; i < len(rom); i++ {
 		(*res.memory).Write_8(uint16(i), rom[i])
@@ -91,16 +93,28 @@ func (this *cpu) state() {
 	}
 }
 
+func (this *cpu) fetch() uint8 {
+	op := (*this.memory).Read_8(this.pc.value)
+	(*this).pc.value += 1
+	return op
+}
+
+func (this *cpu) fetch_16() uint16 {
+  a := uint16(this.fetch())
+  b := uint16(this.fetch())
+  return ((b << 8) | a)
+}
+
 func (this *cpu) popStack() uint16 {
 	x := (*this.memory).Read_16(this.sp.value)
 	this.sp.value += 2
 	return x
 }
 
-func (this *cpu) fetch() uint8 {
-	op := (*this.memory).Read_8(this.pc.value)
-	(*this).pc.value += 1
-	return op
+func (this *cpu) pushStack(a uint16) {
+  (*this).memory.Write_8((*this).sp.value - 1, uint8(uint16(a & 0xFF) >> 8))
+  (*this).memory.Write_8((*this).sp.value - 2, uint8(a & 0xFF))
+  (*this).sp.value -= 2
 }
 
 func (this *cpu) compare_8(a uint8, b uint8) {
@@ -111,34 +125,86 @@ func (this *cpu) compare_8(a uint8, b uint8) {
 	this.set_f_carry(a < b)
 }
 
-func (this *cpu) Step() {
+func (this *cpu) call(a uint16) {
+  (*this).pushStack((*this).pc.value)
+  (*this).pc.value = a
+}
+
+func (this *cpu) decrement(x uint8) uint8 {
+  x -= 1
+	this.set_f_zero(x == 0)
+	this.set_f_subtr(true)
+	this.set_f_h_carry((x + 1) & 0x0f == 0)
+  return x
+}
+
+/**
+ * fetch, execute und return clockcycles
+ * übersicht implementiert:
+ *  fetch
+ *  call
+ *  compare
+ *  pop
+ */
+func (this *cpu) Step() int {
 	op := this.fetch()
 	fmt.Printf("%02x\n", op)
 	switch op {
-	case 0x0:
-		break
+	case 0x00:
+    return 4
+  case 0x05:
+    (*this).bc.w_high(this.decrement((*this).bc.r_high()))
+    return 4
+  case 0x06:
+    (*this).bc.w_high(this.fetch())
+    return 8
+  case 0x20:
+    a := int8(this.fetch())
+    ticks := 8
+    if(!this.get_f_zero()) {
+      (*this).pc.value = uint16(int32((*this).pc.value) + int32(a))
+      ticks += 4
+    }
+    return ticks
+  case 0x40:
+    (*this).bc.w_high((*this).bc.r_high())
+    return 4
+  case 0xc1:
+    (*this).bc.value = this.popStack()
+    return 12
 	case 0xc3:
 		a := this.fetch()
 		b := this.fetch()
 		this.pc.value = uint16(a | b<<8)
-		break
+		return 12
+  case 0xc5:
+    this.pushStack((*this).bc.value)
+    return 16
 	case 0xc8:
 		if(this.get_f_zero()) {
 			this.pc.value = this.popStack()
 		}
-		break
+		return 8
+  case 0xcd:
+    this.call(this.fetch_16())
+    return 12
 	case 0xe0:
 		i := 0xff00 + uint16(this.fetch())
 		(*this.memory).Write_8(i, this.af.r_high())
-		break
+		return 12
 	case 0xf0:
-		a := (*this.memory).Read_8(0xFF00 + uint16(this.fetch()))
+		a := (*this.memory).Read_8(0xff00 + uint16(this.fetch()))
 		this.af.w_high(a)
-		break
+		return 12
+  case 0xfb:
+    (*this).Interrupt = true
+    return 4
 	case 0xfe:
 		this.compare_8(this.af.r_high(), this.fetch())
-		break
+		return 8
 	default:
 		fmt.Printf("opcode not implemented: %x\n", op)
+		return -1
 	}
+	return -1
 }

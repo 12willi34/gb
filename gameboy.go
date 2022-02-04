@@ -3,19 +3,16 @@ package gb
 import ()
 
 type GameBoy struct {
-    Mu *memoryunit
-    Processor *cpu
-
-    //ToDo - clock cycles
-    //ToDo - all states of the gameboy
+  Mu *memoryunit
+  Processor *cpu
 }
 
 func NewGameBoy(rom []byte) GameBoy {
-    mu := NewMemoryUnit()
-    processor := NewCPU(rom, &mu)
-    gameboy := GameBoy {
-        Mu: &mu,
-        Processor: &processor,
-    }
-    return gameboy
+  mu := NewMemoryUnit()
+  processor := NewCPU(rom, &mu)
+  gameboy := GameBoy {
+    Mu: &mu,
+    Processor: &processor,
+  }
+  return gameboy
 }

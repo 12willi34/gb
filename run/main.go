@@ -8,11 +8,11 @@ import (
 
 func test_gb() {
 	fmt.Println("testing gameboy")
-	firstFile, _ := os.ReadDir("../rom/")
-	rom, _ := os.ReadFile("../rom/" + firstFile[0].Name())
+	roms, _ := os.ReadDir("../rom/")
+	rom, _ := os.ReadFile("../rom/" + roms[0].Name())
     gameboy := gb.NewGameBoy(rom)
-	for i := 0; i < 10; i++ {
-		(*gameboy.Processor).Step()
+	for ((*gameboy.Processor).Step() > -1) {
+		continue
 	}
 }
 
