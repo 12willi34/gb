@@ -2,7 +2,7 @@ package gb
 
 //pandocs: http://bgb.bircd.org/pandocs.htm
 //golang implementation: https://github.com/Humpheh/goboy
-//rust implementation: https://rylev.github.io/DMG-01/public/book/introduction.html#why-rust
+//rust implementation: https://rylev.github.io/DMG-01/public/book/introduction.html
 
 import (
   "fmt";
