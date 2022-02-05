@@ -1,12 +1,9 @@
 package gb
 
-//high level sources
 //https://www.linkedin.com/pulse/creating-gameboy-emulator-part-1-bruno-croci
 //http://gameboy.mongenel.com/dmg/asmmemmap.html
 //https://raphaelstaebler.medium.com/memory-and-memory-mapped-i-o-of-the-gameboy-part-3-of-a-series-37025b40d89b
-
-//layout
-//http://bgb.bircd.org/pandocs.htm#memorymap
+//memory layout: http://bgb.bircd.org/pandocs.htm#memorymap
 
 import ()
 
