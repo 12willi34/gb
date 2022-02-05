@@ -1,13 +1,13 @@
 package gb
 
 //pandocs: http://bgb.bircd.org/pandocs.htm
+//GBEDG: https://hacktixme.ga/GBEDG/
 //golang implementation: https://github.com/Humpheh/goboy
 //rust implementation: https://rylev.github.io/DMG-01/public/book/introduction.html
 //timing: https://robertovaccari.com/blog/2020_09_26_gameboy/
 
 import (
   "fmt"
-  "time"
 )
 
 type GameBoy struct {
@@ -31,8 +31,7 @@ func (this *GameBoy) Init() {
 }
 
 func (this *GameBoy) loop() {
-  for true {
-    t_start := time.Now()
-    cycles := (*(*this).Processor).Step()
+  for((*(*this).Processor).Step() != -1) {
+    continue
   }
 }
