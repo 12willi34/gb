@@ -3,9 +3,11 @@ package gb
 //pandocs: http://bgb.bircd.org/pandocs.htm
 //golang implementation: https://github.com/Humpheh/goboy
 //rust implementation: https://rylev.github.io/DMG-01/public/book/introduction.html
+//timing: https://robertovaccari.com/blog/2020_09_26_gameboy/
 
 import (
-  "fmt";
+  "fmt"
+  "time"
 )
 
 type GameBoy struct {
@@ -23,9 +25,14 @@ func NewGameBoy(rom []byte) *GameBoy {
   return &gameboy
 }
 
-func (gameboy *GameBoy) Init() {
+func (this *GameBoy) Init() {
   fmt.Println("starting gameboy")
-  for((*(*gameboy).Processor).Step() != -1) {
-    continue
+  this.loop()
+}
+
+func (this *GameBoy) loop() {
+  for true {
+    t_start := time.Now()
+    cycles := (*(*this).Processor).Step()
   }
 }
