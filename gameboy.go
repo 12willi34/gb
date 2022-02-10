@@ -10,6 +10,8 @@ import (
   "fmt"
 )
 
+const blank_cycles = 69833
+
 type GameBoy struct {
   Mu *memoryunit
   Processor *cpu
@@ -31,7 +33,16 @@ func (this *GameBoy) Init() {
 }
 
 func (this *GameBoy) loop() {
-  for((*(*this).Processor).Step() != -1) {
-    continue
+  vblank := blank_cycles
+  for true {
+    steps := (*(*this).Processor).Step()
+    if(steps == -1) {
+      break
+    }
+    vblank -= steps
+    if(vblank <= 0) {
+      fmt.Println("draw")
+      vblank = blank_cycles
+    }
   }
 }
