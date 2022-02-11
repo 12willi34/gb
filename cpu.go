@@ -1,8 +1,5 @@
 package gb
 
-//high level guide: https://raphaelstaebler.medium.com/building-a-gameboy-from-scratch-part-2-the-cpu-d6986a5c6c74
-//initial register values: https://mstojcevich.github.io/post/d-gb-emu-registers/
-
 import (
 	"fmt";
 )

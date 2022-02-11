@@ -1,11 +1,5 @@
 package gb
 
-//pandocs: http://bgb.bircd.org/pandocs.htm
-//GBEDG: https://hacktixme.ga/GBEDG/
-//golang implementation: https://github.com/Humpheh/goboy
-//rust implementation: https://rylev.github.io/DMG-01/public/book/introduction.html
-//timing: https://robertovaccari.com/blog/2020_09_26_gameboy/
-
 import (
   "fmt"
 )

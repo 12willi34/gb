@@ -1,0 +1,18 @@
+pandocs
+  http://bgb.bircd.org/pandocs.htm
+high level guide
+  https://raphaelstaebler.medium.com/building-a-gameboy-from-scratch-part-2-the-cpu-d6986a5c6c74
+cpu register init
+  https://mstojcevich.github.io/post/d-gb-emu-registers/
+WIP - GBEDG
+  https://hacktixme.ga/GBEDG
+go implementation
+  https://github.com/Humpheh/goboy
+rust implementation
+  https://rylev.github.io/DMG-01/public/book/introduction.html
+blog
+  https://robertovaccari.com/blog/2020_09_26_gameboy
+linkedin guide
+  https://www.linkedin.com/pulse/creating-gameboy-emulator-part-1-bruno-croci
+lookup ref
+  http://gameboy.mongenel.com/dmg/asmmemmap.html
