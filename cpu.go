@@ -13,6 +13,7 @@ type cpu struct {
 	hl Register
 	sp Register //stack pointer
 	pc Register //program counter
+  ops [0x100]func(*cpu) int
 }
 
 func NewCPU(rom []byte, mu *memoryunit) cpu {
@@ -26,6 +27,7 @@ func NewCPU(rom []byte, mu *memoryunit) cpu {
 		sp: Register {value: 0xFFFE,},
 		pc: Register {value: 0x0100,},
 	}
+  res.ops = (&res).init_ops()
 	for i := 0; i < len(rom); i++ {
 		(*res.memory).Write_8(uint16(i), rom[i])
 	}
@@ -75,63 +77,15 @@ func (this *cpu) decrement(x uint8) uint8 {
 func (this *cpu) Step() int {
 	op := this.fetch()
 	fmt.Printf("%02x\n", op)
-	switch op {
-	case 0x00:
-    return 4
-  case 0x05:
-    (*this).bc.w_high(this.decrement((*this).bc.r_high()))
-    return 4
-  case 0x06:
-    (*this).bc.w_high(this.fetch())
-    return 8
-  case 0x20:
-    a := int8(this.fetch())
-    ticks := 8
-    if(!this.get_f_zero()) {
-      (*this).pc.value = uint16(int32((*this).pc.value) + int32(a))
-      ticks += 4
-    }
-    return ticks
-  case 0x40:
-    (*this).bc.w_high((*this).bc.r_high())
-    return 4
-  case 0xc1:
-    (*this).bc.value = this.popStack()
-    return 12
-	case 0xc3:
-		a := this.fetch()
-		b := this.fetch()
-		this.pc.value = uint16(a | b<<8)
-		return 12
-  case 0xc5:
-    this.pushStack((*this).bc.value)
-    return 16
-	case 0xc8:
-		if(this.get_f_zero()) {
-			this.pc.value = this.popStack()
-		}
-		return 8
-  case 0xcd:
-    (*this).pushStack((*this).pc.value)
-    (*this).pc.value = this.fetch_16()
-    return 12
-	case 0xe0:
-		i := 0xff00 + uint16(this.fetch())
-		(*this.memory).Write_8(i, this.af.r_high())
-		return 12
-	case 0xf0:
-		a := (*this.memory).Read_8(0xff00 + uint16(this.fetch()))
-		this.af.w_high(a)
-		return 12
-  case 0xfb:
-    (*this).Interrupt = true
-    return 4
-	case 0xfe:
-		this.compare_8(this.af.r_high(), this.fetch())
-		return 8
-	default:
+  f := (*this).ops[op]
+  if(f == nil) {
 		fmt.Printf("opcode not implemented: %x\n", op)
+    fmt.Printf("length of ops: %x\n", len(this.init_ops()))
 		return -1
-	}
-	return -1
+  }
+  steps := f(this)
+  this.timing(steps)
+  return steps
 }
+
+func (this *cpu) timing(cycles int) {}

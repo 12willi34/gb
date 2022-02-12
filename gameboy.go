@@ -31,12 +31,12 @@ func (this *GameBoy) loop() {
   for true {
     steps := (*(*this).Processor).Step()
     if(steps == -1) {
-      break
+      return
     }
     vblank -= steps
     if(vblank <= 0) {
-      fmt.Println("draw")
-      vblank = blank_cycles
+      fmt.Println("first vblank done")
+      return
     }
   }
 }
