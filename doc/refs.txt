@@ -14,5 +14,5 @@ blog
   https://robertovaccari.com/blog/2020_09_26_gameboy
 linkedin guide
   https://www.linkedin.com/pulse/creating-gameboy-emulator-part-1-bruno-croci
-lookup ref
+memory ref
   http://gameboy.mongenel.com/dmg/asmmemmap.html

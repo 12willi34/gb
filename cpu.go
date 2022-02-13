@@ -83,9 +83,5 @@ func (this *cpu) Step() int {
     fmt.Printf("length of ops: %x\n", len(this.init_ops()))
 		return -1
   }
-  steps := f(this)
-  this.timing(steps)
-  return steps
+  return f(this)
 }
-
-func (this *cpu) timing(cycles int) {}
