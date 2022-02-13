@@ -78,6 +78,11 @@ func EI(this *cpu) int {
   return 4
 }
 
+func DI(this *cpu) int {
+  (*this).Interrupt = false
+  return 4
+}
+
 func CP_n(this *cpu) int {
   this.compare_8(this.af.r_high(), this.fetch())
   return 8
@@ -96,6 +101,7 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0xcd] = CALL
   ops[0xe0] = LD_n_A
   ops[0xf0] = LD_A_n
+  ops[0xf3] = DI
   ops[0xfb] = EI
   ops[0xfe] = CP_n
   return ops

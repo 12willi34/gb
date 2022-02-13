@@ -4,17 +4,32 @@ import ()
 
 const enable_register = 0xffff
 const flag_register = 0xff0f
+const vblank_flag = 0
+const lcd_start_flag = 1
+const timer_flag = 2
+const serial_flag = 3
+const joypad_flag = 4
+var flag_addr_table = []uint16{0x40, 0x48, 0x50, 0x58, 0x60}
 
 type interrupter struct {
   bus memoryunit
   processor cpu
 }
 
-func Interrupter(mu memoryunit, processor cpu) *interrupter {
-  return &interrupter {
+func Interrupter(mu memoryunit, processor cpu) interrupter {
+  return interrupter {
     bus: mu,
     processor: processor,
   }
+}
+
+func (this *interrupter) set_flag(i int) {
+  new_flag_val := (*this).bus.Read_8(flag_register) | (1 << i)
+  (*this).bus.Write_8(flag_register, new_flag_val)
+}
+
+func (this *interrupter) Request(flag int) {
+  this.set_flag(flag)
 }
 
 func (this *interrupter) check_interrupt(inter_f uint8, inter_e uint8, i int) bool {
@@ -22,7 +37,9 @@ func (this *interrupter) check_interrupt(inter_f uint8, inter_e uint8, i int) bo
 }
 
 func (this *interrupter) do_interrupt(i int) {
-  //ToDo
+  (*this).processor.Interrupt = false
+  (*this).processor.pushStack((*this).processor.pc.value)
+  (*this).processor.pc.value = flag_addr_table[i]
 }
 
 func (this *interrupter) handle() {

@@ -16,13 +16,13 @@ type GameBoy struct {
 func NewGameBoy(rom []byte) *GameBoy {
   mu := NewMemoryUnit()
   processor := NewCPU(rom, &mu)
-  timer := Timer(mu)
   interrupter := Interrupter(mu, processor)
+  timer := Timer(mu, interrupter)
   gameboy := GameBoy {
     Mu: &mu,
     Processor: &processor,
-    timer: timer,
-    interrupter: interrupter,
+    timer: &timer,
+    interrupter: &interrupter,
   }
   return &gameboy
 }
@@ -33,18 +33,21 @@ func (this *GameBoy) Init() {
 }
 
 func (this *GameBoy) loop() {
-  vblank := blank_cycles
   for true {
-    steps := (*(*this).Processor).Step()
-    if(steps == -1) {
-      return
+    vblank := blank_cycles
+    for(vblank > 0) {
+      steps := (*(*this).Processor).Step()
+      if(steps == -1) {
+        return
+      }
+      (*this).timer.Timing(steps)
+      (*this).interrupter.handle()
+      vblank -= steps
     }
-    (*this).timer.Timing(steps)
-    (*this).interrupter.handle()
-    vblank -= steps
-    if(vblank <= 0) {
-      fmt.Println("first vblank done")
-      return
-    }
+
+    //temp
+    fmt.Println("first vblank done")
+    return
+
   }
 }

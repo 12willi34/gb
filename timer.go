@@ -6,34 +6,34 @@ const div = 0xff04
 const tima = 0xff05
 const tma = 0xff06
 const tac = 0xff07
-const interrupt = 0xff0f
 var frequencies = []int{1024, 16, 64, 256}
 
 type timer struct {
   bus memoryunit
   div_internal uint16
   tima_internal int
+  inter interrupter
 }
 
-func Timer(mu memoryunit) *timer {
-  return &timer {
+func Timer(mu memoryunit, inter interrupter) timer {
+  return timer {
     bus: mu,
     div_internal: 0,
     tima_internal: 0,
+    inter: inter,
   }
 }
 
 func (this *timer) tac_stopped() bool {
-  return 1 == 1&(2>>(*this).bus.Read_8(tac))
+  return 1 == 1 & (2 >> (*this).bus.Read_8(tac))
 }
 
 func (this *timer) tac_freq() int {
-  return frequencies[2&(*this).bus.Read_8(tac)]
+  return frequencies[2 & (*this).bus.Read_8(tac)]
 }
 
 func (this *timer) timer_interrupt() {
-  x := (*this).bus.Read_8(interrupt) | (1 << 2)
-  (*this).bus.Write_8(interrupt, x)
+  (*this).inter.Request(timer_flag)
 }
 
 func (this *timer) update_div(cycles int) {
