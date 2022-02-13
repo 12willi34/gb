@@ -74,13 +74,25 @@ func (this *cpu) decrement(x uint8) uint8 {
   return x
 }
 
+//=SBC
+func (this *cpu) subtract_carry(a uint8, b uint8) uint8 {
+  carry := uint16(0)
+  if((*this).get_f_carry()) {carry = uint16(1)}
+  res := uint16(a) - (uint16(b) + carry)
+	this.set_f_zero(res == 0)
+	this.set_f_subtr(true)
+  hc := int16(a & 0x0f) - (int16(b & 0xf) + int16(carry))
+	this.set_f_h_carry(hc < 0)
+	this.set_f_carry(a < b)
+  return uint8(res)
+}
+
 func (this *cpu) Step() int {
 	op := this.fetch()
 	fmt.Printf("%02x\n", op)
   f := (*this).ops[op]
   if(f == nil) {
 		fmt.Printf("opcode not implemented: %x\n", op)
-    fmt.Printf("length of ops: %x\n", len(this.init_ops()))
 		return -1
   }
   return f(this)
