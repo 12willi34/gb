@@ -74,6 +74,12 @@ func (this *cpu) decrement(x uint8) uint8 {
   return x
 }
 
+//=RST
+func (this *cpu) restart(next uint16) {
+  this.pushStack((*this).pc.value)
+  (*this).pc.value = next
+}
+
 //=SBC
 func (this *cpu) subtract_carry(a uint8, b uint8) uint8 {
   carry := uint16(0)

@@ -212,6 +212,46 @@ func SBC_A_HL(this *cpu) int {
   return 8
 }
 
+func RST_38(this *cpu) int {
+  this.restart(0x38)
+  return 32
+}
+
+func RST_30(this *cpu) int {
+  this.restart(0x30)
+  return 32
+}
+
+func RST_28(this *cpu) int {
+  this.restart(0x28)
+  return 32
+}
+
+func RST_20(this *cpu) int {
+  this.restart(0x20)
+  return 32
+}
+
+func RST_18(this *cpu) int {
+  this.restart(0x18)
+  return 32
+}
+
+func RST_10(this *cpu) int {
+  this.restart(0x10)
+  return 32
+}
+
+func RST_08(this *cpu) int {
+  this.restart(0x08)
+  return 32
+}
+
+func RST_00(this *cpu) int {
+  this.restart(0x00)
+  return 32
+}
+
 func (this *cpu) init_ops() [0x100]func(*cpu) int {
   var ops [0x100]func(*cpu) int
   ops[0x00] = NOOP
@@ -241,14 +281,22 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0xc1] = POP_BC
   ops[0xc3] = JP
   ops[0xc5] = PUSH_BC
+  ops[0xc7] = RST_00
   ops[0xc8] = RET_Z
   ops[0xc9] = RET
   ops[0xcd] = CALL
+  ops[0xcf] = RST_08
+  ops[0xdf] = RST_18
+  ops[0xd7] = RST_10
   ops[0xe0] = LD_n_A
+  ops[0xe7] = RST_20
+  ops[0xef] = RST_28
   ops[0xf0] = LD_A_n
   ops[0xf3] = DI
+  ops[0xf7] = RST_30
   ops[0xfa] = LD_A_nn
   ops[0xfb] = EI
   ops[0xfe] = CP_n
+  ops[0xff] = RST_38
   return ops
 }
