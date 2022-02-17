@@ -96,6 +96,33 @@ func LD_A_number(this *cpu) int {
   return 8
 }
 
+func LD_SP_nn(this *cpu) int {
+  (*this).sp.value = this.fetch_16()
+  return 12
+}
+
+func LD_HL_nn(this *cpu) int {
+  (*this).hl.value = this.fetch_16()
+  return 12
+}
+
+func LD_DE_nn(this *cpu) int {
+  (*this).de.value = this.fetch_16()
+  return 12
+}
+
+func LD_BC_nn(this *cpu) int {
+  (*this).bc.value = this.fetch_16()
+  return 12
+}
+
+func LDD_HL_A(this *cpu) int {
+  hl := (*this).hl.value
+  (*(*this).memory).Write_8(hl, (*this).af.r_high())
+  (*this).hl.value = hl - 1
+  return 8
+}
+
 func JR_nZ(this *cpu) int {
   a := int8(this.fetch())
   ticks := 8
@@ -252,14 +279,122 @@ func RST_00(this *cpu) int {
   return 32
 }
 
+func XOR_A(this *cpu) int {
+  a := (*this).af.r_high()
+  (*this).af.w_high(this.xor(a, a))
+  return 4
+}
+
+func XOR_B(this *cpu) int {
+  a := (*this).af.r_high()
+  b := (*this).bc.r_high()
+  (*this).af.w_high(this.xor(a, b))
+  return 4
+}
+
+func XOR_C(this *cpu) int {
+  a := (*this).af.r_high()
+  b := (*this).bc.r_low()
+  (*this).af.w_high(this.xor(a, b))
+  return 4
+}
+
+func XOR_D(this *cpu) int {
+  t := *this
+  t.af.w_high(this.xor(t.af.r_high(), t.de.r_high()))
+  return 4
+}
+
+func XOR_E(this *cpu) int {
+  t := *this
+  t.af.w_high(this.xor(t.af.r_high(), t.de.r_low()))
+  return 4
+}
+
+func XOR_H(this *cpu) int {
+  t := *this
+  t.af.w_high(this.xor(t.af.r_high(), t.hl.r_high()))
+  return 4
+}
+
+func XOR_L(this *cpu) int {
+  t := *this
+  t.af.w_high(this.xor(t.af.r_high(), t.hl.r_low()))
+  return 4
+}
+
+func XOR_HL(this *cpu) int {
+  t := *this
+  hl := (*(t.memory)).Read_8(t.hl.value)
+  t.af.w_high(this.xor(t.af.r_high(), hl))
+  return 8
+}
+
+func XOR_number(this *cpu) int {
+  t := *this
+  n := this.fetch()
+  t.af.w_high(this.xor(t.af.r_high(), n))
+  return 8
+}
+
+func CB_OP(this *cpu) int {
+  return this.init_cb_ops()[this.fetch()](this)
+}
+
+func SWAP_B(this *cpu) int {
+  (*this).bc.w_high(this.swap((*this).bc.r_high()))
+  return 8
+}
+
+func SWAP_A(this *cpu) int {
+  (*this).af.w_high(this.swap((*this).af.r_high()))
+  return 8
+}
+
+func SWAP_C(this *cpu) int {
+  (*this).bc.w_low(this.swap((*this).bc.r_low()))
+  return 8
+}
+
+func SWAP_D(this *cpu) int {
+  (*this).de.w_high(this.swap((*this).de.r_high()))
+  return 8
+}
+
+func SWAP_E(this *cpu) int {
+  (*this).de.w_low(this.swap((*this).de.r_low()))
+  return 8
+}
+
+func SWAP_H(this *cpu) int {
+  (*this).hl.w_high(this.swap((*this).hl.r_high()))
+  return 8
+}
+
+func SWAP_L(this *cpu) int {
+  (*this).hl.w_low(this.swap((*this).hl.r_low()))
+  return 8
+}
+
+func SWAP_HL(this *cpu) int {
+  addr := (*this).hl.value
+  (*(*this).memory).Write_8(addr, this.swap((*(*this).memory).Read_8(addr)))
+  return 16
+}
+
 func (this *cpu) init_ops() [0x100]func(*cpu) int {
   var ops [0x100]func(*cpu) int
   ops[0x00] = NOOP
+  ops[0x01] = LD_BC_nn
   ops[0x05] = DEC_B
   ops[0x06] = LD_B_n
   ops[0x0a] = LD_A_BC
+  ops[0x11] = LD_DE_nn
   ops[0x1a] = LD_A_DE
   ops[0x20] = JR_nZ
+  ops[0x21] = LD_HL_nn
+  ops[0x31] = LD_SP_nn
+  ops[0x32] = LDD_HL_A
   ops[0x3e] = LD_A_number
   ops[0x40] = LD_B_B
   ops[0x78] = LD_A_B
@@ -278,18 +413,28 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0x9d] = SBC_A_L
   ops[0x9e] = SBC_A_HL
   ops[0x9f] = SBC_A_A
+  ops[0xa8] = XOR_B
+  ops[0xa9] = XOR_C
+  ops[0xaa] = XOR_D
+  ops[0xab] = XOR_E
+  ops[0xac] = XOR_H
+  ops[0xad] = XOR_L
+  ops[0xae] = XOR_HL
+  ops[0xaf] = XOR_A
   ops[0xc1] = POP_BC
   ops[0xc3] = JP
   ops[0xc5] = PUSH_BC
   ops[0xc7] = RST_00
   ops[0xc8] = RET_Z
   ops[0xc9] = RET
+  ops[0xcb] = CB_OP
   ops[0xcd] = CALL
   ops[0xcf] = RST_08
   ops[0xdf] = RST_18
   ops[0xd7] = RST_10
   ops[0xe0] = LD_n_A
   ops[0xe7] = RST_20
+  ops[0xee] = XOR_number
   ops[0xef] = RST_28
   ops[0xf0] = LD_A_n
   ops[0xf3] = DI
@@ -300,3 +445,17 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0xff] = RST_38
   return ops
 }
+
+func (this *cpu) init_cb_ops() [0x100]func(*cpu) int {
+  var cb_ops [0x100]func(*cpu) int
+  cb_ops[0x30] = SWAP_B
+  cb_ops[0x31] = SWAP_C
+  cb_ops[0x37] = SWAP_A
+  cb_ops[0x32] = SWAP_D
+  cb_ops[0x33] = SWAP_E
+  cb_ops[0x34] = SWAP_H
+  cb_ops[0x35] = SWAP_L
+  cb_ops[0x36] = SWAP_HL
+  return cb_ops
+}
+

@@ -25,7 +25,7 @@ func NewCPU(rom []byte, mu *memoryunit) cpu {
 		de: Register {value: 0x00D8,},
 		hl: Register {value: 0x014D,},
 		sp: Register {value: 0xFFFE,},
-		pc: Register {value: 0x0100,},
+		pc: Register {value: 0x0000,},
 	}
   res.ops = (&res).init_ops()
 	for i := 0; i < len(rom); i++ {
@@ -71,6 +71,24 @@ func (this *cpu) decrement(x uint8) uint8 {
 	this.set_f_zero(x == 0)
 	this.set_f_subtr(true)
 	this.set_f_h_carry((x + 1) & 0x0f == 0)
+  return x
+}
+
+func (this *cpu) xor(a uint8, b uint8) uint8 {
+  x := a ^ b
+	this.set_f_zero(x == 0)
+	this.set_f_subtr(false)
+	this.set_f_h_carry(false)
+	this.set_f_carry(false)
+  return x
+}
+
+func (this *cpu) swap(x uint8) uint8 {
+  x = uint8(x << 4) | uint8(x >> 4)
+	this.set_f_zero(x == 0)
+	this.set_f_subtr(false)
+	this.set_f_h_carry(false)
+	this.set_f_carry(false)
   return x
 }
 

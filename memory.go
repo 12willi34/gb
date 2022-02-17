@@ -10,6 +10,7 @@ func NewMemoryUnit() memoryunit {
 	mu := memoryunit {
 		addr: make([]uint8, 0x10000),
 	}
+  /*
   mu.addr[0x04] = 0x1e
   mu.addr[0x05] = 0x00
   mu.addr[0x06] = 0x00
@@ -44,6 +45,7 @@ func NewMemoryUnit() memoryunit {
   mu.addr[0x4a] = 0x00
   mu.addr[0x4b] = 0x00
   mu.addr[0xff] = 0x00
+  */
   return mu
 }
 

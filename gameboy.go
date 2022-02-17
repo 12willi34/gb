@@ -44,10 +44,5 @@ func (this *GameBoy) loop() {
       (*this).interrupter.handle()
       vblank -= steps
     }
-
-    //temp
-    fmt.Println("first vblank done")
-    return
-
   }
 }
