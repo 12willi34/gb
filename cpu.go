@@ -66,8 +66,16 @@ func (this *cpu) compare_8(a uint8, b uint8) {
 	this.set_f_carry(a < b)
 }
 
+func (this *cpu) increment(x uint8) uint8 {
+  res := x + 1
+	this.set_f_zero(res == 0)
+	this.set_f_subtr(false)
+	this.set_f_h_carry((x & 0xf) + (1 & 0xf) > 0xf)
+  return res
+}
+
 func (this *cpu) decrement(x uint8) uint8 {
-  x -= 1
+  x--
 	this.set_f_zero(x == 0)
 	this.set_f_subtr(true)
 	this.set_f_h_carry((x + 1) & 0x0f == 0)
@@ -90,6 +98,12 @@ func (this *cpu) swap(x uint8) uint8 {
 	this.set_f_h_carry(false)
 	this.set_f_carry(false)
   return x
+}
+
+func (this *cpu) bit(i uint8, val uint8) {
+	this.set_f_zero(((val >> i) & 1) == 0)
+	this.set_f_subtr(false)
+	this.set_f_h_carry(true)
 }
 
 //=RST
