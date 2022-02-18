@@ -11,6 +11,55 @@ func DEC_B(this *cpu) int {
   return 4
 }
 
+func INC_A(this *cpu) int {
+  x := this.increment((*this).af.r_high())
+  (*this).af.w_high(x)
+  return 4
+}
+
+func INC_B(this *cpu) int {
+  x := this.increment((*this).bc.r_high())
+  (*this).bc.w_high(x)
+  return 4
+}
+
+func INC_C(this *cpu) int {
+  x := this.increment((*this).bc.r_low())
+  (*this).bc.w_low(x)
+  return 4
+}
+
+func INC_D(this *cpu) int {
+  x := this.increment((*this).de.r_high())
+  (*this).de.w_high(x)
+  return 4
+}
+
+func INC_E(this *cpu) int {
+  x := this.increment((*this).de.r_low())
+  (*this).de.w_low(x)
+  return 4
+}
+
+func INC_H(this *cpu) int {
+  x := this.increment((*this).hl.r_high())
+  (*this).hl.w_high(x)
+  return 4
+}
+
+func INC_L(this *cpu) int {
+  x := this.increment((*this).hl.r_low())
+  (*this).hl.w_low(x)
+  return 4
+}
+
+func INC_HL(this *cpu) int {
+  val_before := (*(*this).memory).Read_8((*this).hl.value)
+  val_after := this.increment(val_before)
+  (*(*this).memory).Write_8((*this).hl.value, val_after)
+  return 12
+}
+
 func LD_B_n(this *cpu) int {
   (*this).bc.w_high(this.fetch())
   return 8
@@ -114,6 +163,45 @@ func LD_DE_nn(this *cpu) int {
 func LD_BC_nn(this *cpu) int {
   (*this).bc.value = this.fetch_16()
   return 12
+}
+
+func LD_C_n(this *cpu) int {
+  (*this).bc.w_low(this.fetch())
+  return 8
+}
+
+func LD_D_n(this *cpu) int {
+  (*this).de.w_high(this.fetch())
+  return 8
+}
+
+func LD_E_n(this *cpu) int {
+  (*this).de.w_low(this.fetch())
+  return 8
+}
+
+func LD_H_n(this *cpu) int {
+  (*this).hl.w_high(this.fetch())
+  return 8
+}
+
+func LD_L_n(this *cpu) int {
+  (*this).hl.w_low(this.fetch())
+  return 8
+}
+
+func LD_A_ff00_C(this *cpu) int {
+  i := 0xff00 + uint16((*this).bc.r_low())
+  val := (*(*this).memory).Read_8(i)
+  (*this).af.w_high(val)
+  return 8
+}
+
+func LD_ff00_C_A(this *cpu) int {
+  a := (*this).af.r_high()
+  i := 0xff00 + uint16((*this).bc.r_low())
+  (*(*this).memory).Write_8(i, a)
+  return 8
 }
 
 func LDD_HL_A(this *cpu) int {
@@ -338,7 +426,8 @@ func XOR_number(this *cpu) int {
 }
 
 func CB_OP(this *cpu) int {
-  return this.init_cb_ops()[this.fetch()](this)
+  cb_op := this.fetch()
+  return this.init_cb_ops()[cb_op](this)
 }
 
 func SWAP_B(this *cpu) int {
@@ -386,15 +475,28 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   var ops [0x100]func(*cpu) int
   ops[0x00] = NOOP
   ops[0x01] = LD_BC_nn
+  ops[0x04] = INC_B
   ops[0x05] = DEC_B
   ops[0x06] = LD_B_n
   ops[0x0a] = LD_A_BC
+  ops[0x0c] = INC_C
+  ops[0x0e] = LD_C_n
   ops[0x11] = LD_DE_nn
+  ops[0x14] = INC_D
+  ops[0x16] = LD_D_n
   ops[0x1a] = LD_A_DE
+  ops[0x1c] = INC_E
+  ops[0x1e] = LD_E_n
   ops[0x20] = JR_nZ
   ops[0x21] = LD_HL_nn
+  ops[0x24] = INC_H
+  ops[0x26] = LD_H_n
+  ops[0x2c] = INC_L
+  ops[0x2e] = LD_L_n
   ops[0x31] = LD_SP_nn
   ops[0x32] = LDD_HL_A
+  ops[0x34] = INC_HL
+  ops[0x3c] = INC_A
   ops[0x3e] = LD_A_number
   ops[0x40] = LD_B_B
   ops[0x78] = LD_A_B
@@ -433,10 +535,12 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0xdf] = RST_18
   ops[0xd7] = RST_10
   ops[0xe0] = LD_n_A
+  ops[0xe2] = LD_ff00_C_A
   ops[0xe7] = RST_20
   ops[0xee] = XOR_number
   ops[0xef] = RST_28
   ops[0xf0] = LD_A_n
+  ops[0xf2] = LD_A_ff00_C
   ops[0xf3] = DI
   ops[0xf7] = RST_30
   ops[0xfa] = LD_A_nn
@@ -445,17 +549,3 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0xff] = RST_38
   return ops
 }
-
-func (this *cpu) init_cb_ops() [0x100]func(*cpu) int {
-  var cb_ops [0x100]func(*cpu) int
-  cb_ops[0x30] = SWAP_B
-  cb_ops[0x31] = SWAP_C
-  cb_ops[0x37] = SWAP_A
-  cb_ops[0x32] = SWAP_D
-  cb_ops[0x33] = SWAP_E
-  cb_ops[0x34] = SWAP_H
-  cb_ops[0x35] = SWAP_L
-  cb_ops[0x36] = SWAP_HL
-  return cb_ops
-}
-
