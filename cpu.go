@@ -142,7 +142,7 @@ func (this *cpu) rotate_left(a uint8) uint8 {
 
 func (this *cpu) Step() int {
 	op := this.fetch()
-	fmt.Printf("%02x\n", op)
+	//fmt.Printf("%02x\n", op)
   f := (*this).ops[op]
   if(f == nil) {
 		fmt.Printf("opcode not implemented: %x\n", op)
