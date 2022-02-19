@@ -4,7 +4,6 @@ import ()
 
 const width = 160
 const height = 144
-const lcdc = 0xff40
 
 type Gpu struct {
   mu *memoryunit
