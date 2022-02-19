@@ -127,6 +127,19 @@ func (this *cpu) subtract_carry(a uint8, b uint8) uint8 {
   return uint8(res)
 }
 
+//=RL
+func (this *cpu) rotate_left(a uint8) uint8 {
+  old_cy := uint8(0)
+  if(this.get_f_carry()) { old_cy = uint8(1) }
+  new_cy := a >> 7
+  res := uint8(((a << 1) & 0xff) | old_cy)
+	this.set_f_zero(res == 0)
+	this.set_f_subtr(false)
+	this.set_f_h_carry(false)
+	this.set_f_carry(new_cy == 1)
+  return res
+}
+
 func (this *cpu) Step() int {
 	op := this.fetch()
 	fmt.Printf("%02x\n", op)

@@ -1,6 +1,6 @@
 package gb
 
-import ("fmt")
+import ()
 
 func NOOP(this *cpu) int {
   return 4
@@ -360,6 +360,12 @@ func SBC_A_HL(this *cpu) int {
   return 8
 }
 
+func RLA(this *cpu) int {
+  res := this.rotate_left((*this).af.r_high())
+  (*this).af.w_high(res)
+  return 4
+}
+
 func RST_38(this *cpu) int {
   this.restart(0x38)
   return 32
@@ -459,12 +465,7 @@ func XOR_number(this *cpu) int {
 }
 
 func CB_OP(this *cpu) int {
-  op := this.fetch()
-  f := this.cb_ops[op]
-  if(f == nil) {
-    fmt.Println("opcode not implemented:", op)
-  }
-  return f(this)
+  return ((*this).cb_ops[this.fetch()])(this)
 }
 
 func (this *cpu) init_ops() [0x100]func(*cpu) int {
@@ -482,6 +483,7 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0x12] = LD_DE_A
   ops[0x14] = INC_D
   ops[0x16] = LD_D_n
+  ops[0x17] = RLA
   ops[0x1a] = LD_A_DE
   ops[0x1c] = INC_E
   ops[0x1e] = LD_E_n
