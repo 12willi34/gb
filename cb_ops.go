@@ -2,6 +2,57 @@ package gb
 
 import ()
 
+func SWAP_B(this *cpu) int {
+  (*this).bc.w_high(this.swap((*this).bc.r_high()))
+  return 8
+}
+
+func SWAP_A(this *cpu) int {
+  (*this).af.w_high(this.swap((*this).af.r_high()))
+  return 8
+}
+
+func SWAP_C(this *cpu) int {
+  (*this).bc.w_low(this.swap((*this).bc.r_low()))
+  return 8
+}
+
+func SWAP_D(this *cpu) int {
+  (*this).de.w_high(this.swap((*this).de.r_high()))
+  return 8
+}
+
+func SWAP_E(this *cpu) int {
+  (*this).de.w_low(this.swap((*this).de.r_low()))
+  return 8
+}
+
+func SWAP_H(this *cpu) int {
+  (*this).hl.w_high(this.swap((*this).hl.r_high()))
+  return 8
+}
+
+func SWAP_L(this *cpu) int {
+  (*this).hl.w_low(this.swap((*this).hl.r_low()))
+  return 8
+}
+
+func SWAP_HL(this *cpu) int {
+  addr := (*this).hl.value
+  (*(*this).memory).Write_8(addr, this.swap((*(*this).memory).Read_8(addr)))
+  return 16
+}
+
+func BIT_6_B(this *cpu) int {
+  this.bit(6, (*this).bc.r_high())
+  return 8
+}
+
+func BIT_7_H(this *cpu) int {
+  this.bit(7, (*this).hl.r_high())
+  return 8
+}
+
 func (this *cpu) init_cb_ops() [0x100]func(*cpu) int {
   var cb_ops [0x100]func(*cpu) int
     cb_ops[0x30] = SWAP_B
@@ -14,14 +65,4 @@ func (this *cpu) init_cb_ops() [0x100]func(*cpu) int {
     cb_ops[0x36] = SWAP_HL
     cb_ops[0x7c] = BIT_7_H
     return cb_ops
-}
-
-func BIT_6_B(this *cpu) int {
-  this.bit(6, (*this).bc.r_high())
-  return 8
-}
-
-func BIT_7_H(this *cpu) int {
-  this.bit(7, (*this).hl.r_high())
-  return 8
 }

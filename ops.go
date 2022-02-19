@@ -1,6 +1,6 @@
 package gb
 
-import ()
+import ("fmt")
 
 func NOOP(this *cpu) int {
   return 4
@@ -202,6 +202,39 @@ func LD_ff00_C_A(this *cpu) int {
   i := 0xff00 + uint16((*this).bc.r_low())
   (*(*this).memory).Write_8(i, a)
   return 8
+}
+
+func LD_HL_A(this *cpu) int {
+  a := (*this).af.r_high()
+  b := (*this).hl.value
+  (*(*this).memory).Write_8(b, a)
+  return 8
+}
+
+func LD_BC_A(this *cpu) int {
+  a := (*this).af.r_high()
+  b := (*this).bc.value
+  (*(*this).memory).Write_8(b, a)
+  return 8
+}
+
+func LD_DE_A(this *cpu) int {
+  a := (*this).af.r_high()
+  b := (*this).de.value
+  (*(*this).memory).Write_8(b, a)
+  return 8
+}
+
+func LD_nn_A(this *cpu) int {
+  a := (*this).af.r_high()
+  b := this.fetch_16()
+  (*(*this).memory).Write_8(b, a)
+  return 16
+}
+
+func LD_C_A(this *cpu) int {
+  (*this).bc.w_low((*this).af.r_high())
+  return 4
 }
 
 func LDD_HL_A(this *cpu) int {
@@ -426,55 +459,19 @@ func XOR_number(this *cpu) int {
 }
 
 func CB_OP(this *cpu) int {
-  cb_op := this.fetch()
-  return this.init_cb_ops()[cb_op](this)
-}
-
-func SWAP_B(this *cpu) int {
-  (*this).bc.w_high(this.swap((*this).bc.r_high()))
-  return 8
-}
-
-func SWAP_A(this *cpu) int {
-  (*this).af.w_high(this.swap((*this).af.r_high()))
-  return 8
-}
-
-func SWAP_C(this *cpu) int {
-  (*this).bc.w_low(this.swap((*this).bc.r_low()))
-  return 8
-}
-
-func SWAP_D(this *cpu) int {
-  (*this).de.w_high(this.swap((*this).de.r_high()))
-  return 8
-}
-
-func SWAP_E(this *cpu) int {
-  (*this).de.w_low(this.swap((*this).de.r_low()))
-  return 8
-}
-
-func SWAP_H(this *cpu) int {
-  (*this).hl.w_high(this.swap((*this).hl.r_high()))
-  return 8
-}
-
-func SWAP_L(this *cpu) int {
-  (*this).hl.w_low(this.swap((*this).hl.r_low()))
-  return 8
-}
-
-func SWAP_HL(this *cpu) int {
-  addr := (*this).hl.value
-  (*(*this).memory).Write_8(addr, this.swap((*(*this).memory).Read_8(addr)))
-  return 16
+  op := this.fetch()
+  f := this.cb_ops[op]
+  if(f == nil) {
+    fmt.Println("opcode not implemented:", op)
+  }
+  return f(this)
 }
 
 func (this *cpu) init_ops() [0x100]func(*cpu) int {
   var ops [0x100]func(*cpu) int
   ops[0x00] = NOOP
   ops[0x01] = LD_BC_nn
+  ops[0x02] = LD_BC_A
   ops[0x04] = INC_B
   ops[0x05] = DEC_B
   ops[0x06] = LD_B_n
@@ -482,6 +479,7 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0x0c] = INC_C
   ops[0x0e] = LD_C_n
   ops[0x11] = LD_DE_nn
+  ops[0x12] = LD_DE_A
   ops[0x14] = INC_D
   ops[0x16] = LD_D_n
   ops[0x1a] = LD_A_DE
@@ -499,6 +497,8 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0x3c] = INC_A
   ops[0x3e] = LD_A_number
   ops[0x40] = LD_B_B
+  ops[0x4f] = LD_C_A
+  ops[0x77] = LD_HL_A
   ops[0x78] = LD_A_B
   ops[0x79] = LD_A_C
   ops[0x7a] = LD_A_D
@@ -537,6 +537,7 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0xe0] = LD_n_A
   ops[0xe2] = LD_ff00_C_A
   ops[0xe7] = RST_20
+  ops[0xea] = LD_nn_A
   ops[0xee] = XOR_number
   ops[0xef] = RST_28
   ops[0xf0] = LD_A_n

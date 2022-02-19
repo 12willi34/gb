@@ -14,6 +14,7 @@ type cpu struct {
 	sp Register //stack pointer
 	pc Register //program counter
   ops [0x100]func(*cpu) int
+  cb_ops [0x100]func(*cpu) int
 }
 
 func NewCPU(rom []byte, mu *memoryunit) cpu {
@@ -28,6 +29,7 @@ func NewCPU(rom []byte, mu *memoryunit) cpu {
 		pc: Register {value: 0x0000,},
 	}
   res.ops = (&res).init_ops()
+  res.cb_ops = (&res).init_cb_ops()
 	for i := 0; i < len(rom); i++ {
 		(*res.memory).Write_8(uint16(i), rom[i])
 	}
