@@ -12,6 +12,7 @@ type GameBoy struct {
   Processor *cpu
   timer *timer
   interrupter *interrupter
+  gpu *Gpu
 }
 
 func NewGameBoy(rom []byte) *GameBoy {
@@ -19,11 +20,13 @@ func NewGameBoy(rom []byte) *GameBoy {
   processor := NewCPU(rom, &mu)
   interrupter := Interrupter(mu, processor)
   timer := Timer(mu, interrupter)
+  gpu := NewGpu(&mu)
   gameboy := GameBoy {
     Mu: &mu,
     Processor: &processor,
     timer: &timer,
     interrupter: &interrupter,
+    gpu: gpu,
   }
   return &gameboy
 }
@@ -42,8 +45,9 @@ func (this *GameBoy) loop() {
       if(steps == -1) {
         return
       }
-      (*this).timer.Timing(steps)
-      (*this).interrupter.handle()
+      (*(*this).gpu).Step(steps)
+      (*(*this).timer).Timing(steps)
+      (*(*this).interrupter).handle()
       vblank -= steps
     }
     for(time.Now().UnixMilli() < end) {
