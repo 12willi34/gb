@@ -51,7 +51,7 @@ func (this *GameBoy) loop() {
       vblank -= steps
     }
     for(time.Now().UnixMilli() < end) {
-      time.Sleep(10*time.Millisecond)
+      time.Sleep(1*time.Millisecond)
     }
   }
 }
