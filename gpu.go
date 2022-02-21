@@ -1,6 +1,6 @@
 package gb
 
-import ("fmt")
+import ()
 
 const width = 160
 const height = 144
@@ -11,79 +11,108 @@ const data_mode = uint8(3)
 
 type Gpu struct {
   mu *memoryunit
+  ir interrupter
   lcdc Lcdc
-  lcdc_status Lcdc_status
-  screen []uint8
-  mode uint8
+  stat Stat
+  scroll Scroll
+  window Window
+  palette Palette
+  palette0 ObjPalette0
+  palette1 ObjPalette1
+  line Line
   clock int
-  line int
 }
 
-func NewGpu(mu *memoryunit) *Gpu {
+func NewGpu(mu *memoryunit, interrupter interrupter) *Gpu {
   return &(Gpu {
     mu: mu,
+    ir: interrupter,
     lcdc: NewLcdc(*mu),
-    lcdc_status: NewLcdc_status(*mu),
-    screen: make([]uint8, width*height),
-    mode: 0,
+    stat: NewStat(*mu),
+    scroll: NewScroll(*mu),
+    window: NewWindow(*mu),
+    palette: NewPalette(*mu),
+    palette0: NewObjPalette0(*mu),
+    palette1: NewObjPalette1(*mu),
+    line: NewLine(*mu),
     clock: 0,
-    line: 0,
   })
 }
 
-func (this *Gpu) updateScreen() {
-  fmt.Println("new screen")
+func (this *Gpu) clearScreen() {
   //todo
 }
 
-func (this *Gpu) renderLine() {
+func (this *Gpu) scanline(line uint8) {
   //todo
+}
+
+func (this *Gpu) hdma_transfer() {
+  //todo
+}
+
+func (this *Gpu) updateRegisters() {
+  if(!(*this).lcdc.get_lcd_enabled()) {
+    this.clearScreen()
+    (*this).line.set(0)
+    (*this).stat.set_mode(hblank_mode)
+    return
+  }
+
+  interrupt := false
+
+  switch((*this).stat.get_mode()) {
+    //= 0
+    case hblank_mode:
+      if((*this).clock >= 204) {
+        (*this).clock = 0
+        line := (*this).line.inc()
+        if(line > 143) {
+          interrupt = (*this).stat.set_mode(vblank_mode)
+        } else {
+          this.scanline(line)
+          interrupt = (*this).stat.set_mode(oam_mode)
+        }
+      }
+    //= 1
+    case vblank_mode:
+      if((*this).clock >= 456) {
+        (*this).clock = 0
+        line := (*this).line.inc()
+        if(line > 153) {
+          (*this).ir.Request(0)
+          interrupt = (*this).stat.set_mode(oam_mode)
+          (*this).line.set(0)
+        }
+      }
+    //= 2
+    case oam_mode:
+      if((*this).clock >= 80) {
+        (*this).clock = 0
+        (*this).stat.set_mode(data_mode)
+        this.hdma_transfer()
+      }
+    //= 3
+    case data_mode:
+      if((*this).clock >= 172) {
+        (*this).clock = 0
+        interrupt = (*this).stat.set_mode(hblank_mode)
+      }
+  }
+
+  if(interrupt) { (*this).ir.Request(1) }
+
+  if((*this).line.get() == (*this).line.get_c()) {
+    (*this).stat.set((*this).stat.get() | (1 << 2))
+    if(((*this).stat.get() & (1 << 6)) > 0) {
+      (*this).ir.Request(1)
+    }
+  } else {
+    (*this).stat.set((*this).stat.get() & uint8(^(uint8(1) << 2)))
+  }
 }
 
 func (this *Gpu) Step(cycles int) {
   (*this).clock += cycles
-
-  /*
-  if(!t.lcdc.lcd_enabled()) {
-    return
-  }
-  */
-
-  switch((*this).mode) {
-    case hblank_mode:
-      if((*this).clock >= 204) {
-        (*this).clock = 0
-        (*this).line++
-        if((*this).line == 143) {
-          (*this).mode = vblank_mode
-          this.updateScreen()
-        } else {
-          (*this).mode = oam_mode
-        }
-      }
-      break
-    case vblank_mode:
-      if((*this).clock >= 456) {
-        (*this).clock = 0
-        (*this).line++
-        if((*this).line > 153) {
-          (*this).mode = oam_mode
-          (*this).line = 0
-        }
-      }
-      break
-    case oam_mode:
-      if((*this).clock >= 80) {
-        (*this).clock = 0
-        (*this).mode = data_mode
-      }
-      break
-    case data_mode:
-      if((*this).clock >= 172) {
-        (*this).clock = 0
-        (*this).mode = hblank_mode
-        this.renderLine()
-      }
-      break
-  }
+  this.updateRegisters()
 }

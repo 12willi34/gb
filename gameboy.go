@@ -20,7 +20,7 @@ func NewGameBoy(rom []byte) *GameBoy {
   processor := NewCPU(rom, &mu)
   interrupter := Interrupter(mu, processor)
   timer := Timer(mu, interrupter)
-  gpu := NewGpu(&mu)
+  gpu := NewGpu(&mu, interrupter)
   gameboy := GameBoy {
     Mu: &mu,
     Processor: &processor,
