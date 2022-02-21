@@ -2,7 +2,7 @@ package gb
 
 import (
   "fmt"
-  "time"
+  //"time"
 )
 
 const blank_cycles = 69833
@@ -39,7 +39,7 @@ func (this *GameBoy) Init() {
 func (this *GameBoy) loop() {
   for true {
     vblank := blank_cycles
-    end := time.Now().UnixMilli() + (1/60)*int64(time.Millisecond)
+    //end := time.Now().UnixMilli() + (1/60)*int64(time.Millisecond)
     for(vblank > 0) {
       steps := (*(*this).Processor).Step()
       if(steps == -1) {
@@ -50,8 +50,10 @@ func (this *GameBoy) loop() {
       (*(*this).interrupter).handle()
       vblank -= steps
     }
+    /*
     for(time.Now().UnixMilli() < end) {
       time.Sleep(1*time.Millisecond)
     }
+    */
   }
 }
