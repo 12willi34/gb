@@ -30,7 +30,7 @@ func (this Lcdc) set(val uint8 ) {
 }
 
 func (this Lcdc) get_lcd_enabled() bool {
-  return 0 > this.mu.Read_8(lcdc) & (1 << 7)
+  return 0 < this.mu.Read_8(lcdc) & (1 << 7)
 }
 
 /* Stat */
@@ -55,7 +55,7 @@ func (this Stat) get_mode() uint8 {
 
 func (this Stat) set_mode(val uint8) bool {
   status := this.get()
-  this.set(status | val)
+  this.set((status & ^uint8(3))| val)
   if(val != 3) {
     return 0 < (status & (1 << (3 + val)))
   }

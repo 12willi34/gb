@@ -24,7 +24,7 @@ type Gpu struct {
 }
 
 func NewGpu(mu *memoryunit, interrupter interrupter) *Gpu {
-  return &(Gpu {
+  x := &(Gpu {
     mu: mu,
     ir: interrupter,
     lcdc: NewLcdc(*mu),
@@ -37,6 +37,8 @@ func NewGpu(mu *memoryunit, interrupter interrupter) *Gpu {
     line: NewLine(*mu),
     clock: 0,
   })
+  (*x).lcdc.set((*x).lcdc.get() | (1 << 7)) //enable lcd
+  return x
 }
 
 func (this *Gpu) clearScreen() {
@@ -62,20 +64,18 @@ func (this *Gpu) updateRegisters() {
   interrupt := false
 
   switch((*this).stat.get_mode()) {
-    //= 0
-    case hblank_mode:
+    case hblank_mode: //= 0
       if((*this).clock >= 204) {
         (*this).clock = 0
         line := (*this).line.inc()
-        if(line > 143) {
+        if(line >= height) {
           interrupt = (*this).stat.set_mode(vblank_mode)
         } else {
           this.scanline(line)
           interrupt = (*this).stat.set_mode(oam_mode)
         }
       }
-    //= 1
-    case vblank_mode:
+    case vblank_mode: //= 1
       if((*this).clock >= 456) {
         (*this).clock = 0
         line := (*this).line.inc()
@@ -85,22 +85,22 @@ func (this *Gpu) updateRegisters() {
           (*this).line.set(0)
         }
       }
-    //= 2
-    case oam_mode:
+    case oam_mode: //= 2
       if((*this).clock >= 80) {
         (*this).clock = 0
         (*this).stat.set_mode(data_mode)
         this.hdma_transfer()
       }
-    //= 3
-    case data_mode:
+    case data_mode: //= 3
       if((*this).clock >= 172) {
         (*this).clock = 0
         interrupt = (*this).stat.set_mode(hblank_mode)
       }
   }
 
-  if(interrupt) { (*this).ir.Request(1) }
+  if(interrupt) {
+    (*this).ir.Request(1)
+  }
 
   if((*this).line.get() == (*this).line.get_c()) {
     (*this).stat.set((*this).stat.get() | (1 << 2))
