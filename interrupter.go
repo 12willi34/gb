@@ -1,6 +1,8 @@
 package gb
 
-import ()
+import (
+  //"fmt"
+)
 
 const enable_register = 0xffff
 const flag_register = 0xff0f

@@ -1,8 +1,8 @@
 package gb
 
 import (
-  "fmt";
-  "math";
+  "fmt"
+  "math"
 )
 
 func (this *cpu) _set_f(x bool, i int) {

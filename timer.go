@@ -1,6 +1,8 @@
 package gb
 
-import ()
+import (
+  //"fmt"
+)
 
 const div = 0xff04
 const tima = 0xff05

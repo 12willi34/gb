@@ -1,6 +1,8 @@
 package gb
 
-import ()
+import (
+  "fmt"
+)
 
 const width = 160
 const height = 144

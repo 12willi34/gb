@@ -15,9 +15,9 @@ type GameBoy struct {
   gpu *Gpu
 }
 
-func NewGameBoy(rom []byte) *GameBoy {
+func NewGameBoy(boot []byte, rom []byte) *GameBoy {
   mu := NewMemoryUnit()
-  processor := NewCPU(rom, &mu)
+  processor := NewCPU(boot, rom, &mu)
   interrupter := Interrupter(mu, processor)
   timer := Timer(mu, interrupter)
   gpu := NewGpu(&mu, interrupter)

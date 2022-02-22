@@ -1,7 +1,7 @@
 package gb
 
 import (
-	"fmt";
+	"fmt"
 )
 
 type cpu struct {
@@ -17,7 +17,7 @@ type cpu struct {
   cb_ops [0x100]func(*cpu) int
 }
 
-func NewCPU(rom []byte, mu *memoryunit) cpu {
+func NewCPU(boot []byte, rom []byte, mu *memoryunit) cpu {
 	res := cpu {
 		memory: mu,
     Interrupt: false,
@@ -30,8 +30,11 @@ func NewCPU(rom []byte, mu *memoryunit) cpu {
 	}
   res.ops = (&res).init_ops()
   res.cb_ops = (&res).init_cb_ops()
+	for i := 0; i < 0x100; i++ {
+		(*res.memory).Write_8(uint16(i), boot[i])
+	}
 	for i := 0; i < len(rom); i++ {
-		(*res.memory).Write_8(uint16(i), rom[i])
+		(*res.memory).Write_8(uint16(i + 0x100), rom[i])
 	}
 	return res
 }
