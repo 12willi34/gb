@@ -1,5 +1,9 @@
 package gb
 
+import (
+  "math"
+)
+
 type Register struct {
   value uint16
 }
@@ -19,9 +23,21 @@ func (this *Register) w_low(data uint8) {
 }
 
 func (this *Register) w_high(data uint8) {
-  a := uint16(data) << 8
-  b := uint16((*this).r_low())
-  (*this).value = a | b
+  (*this).value = uint16(data) << 8 | uint16((*this).r_low())
+}
+
+func (this *cpu) _set_f(set bool, flag int) {
+  if(set) {
+    this.af.w_low(this.af.r_low() | uint8(math.Pow(2, float64(flag))))
+  } else {
+    this.af.w_low(this.af.r_low() & ^uint8(math.Pow(2, float64(flag))))
+  }
+}
+
+func (this *cpu) _get_f(i int) bool {
+  l := this.af.r_low() & uint8(math.Pow(2, float64(i)))
+  r := uint8(math.Pow(2, float64(i)))
+  return l == r
 }
 
 func (this *cpu) set_f_zero(x bool) { this._set_f(x, 7) }
