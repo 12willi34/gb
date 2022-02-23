@@ -17,9 +17,9 @@ type cpu struct {
   cb_ops [0x100]func(*cpu) int
 }
 
-func NewCPU(boot []byte, rom []byte, mu *memoryunit) cpu {
+func NewCPU(boot []byte, rom []byte, mu memoryunit) cpu {
 	res := cpu {
-		mu: mu,
+		mu: &mu,
     Interrupt: false,
 		af: Register {value: 0x01B0,},
 		bc: Register {value: 0x0013,},

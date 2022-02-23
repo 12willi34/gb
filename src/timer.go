@@ -17,7 +17,7 @@ type timer struct {
   inter interrupter
 }
 
-func Timer(mu memoryunit, inter interrupter) timer {
+func NewTimer(mu memoryunit, inter interrupter) timer {
   return timer {
     bus: mu,
     div_internal: 0,

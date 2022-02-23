@@ -25,21 +25,21 @@ type Gpu struct {
   clock int
 }
 
-func NewGpu(mu *memoryunit, interrupter interrupter) *Gpu {
-  x := &(Gpu {
-    mu: mu,
+func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
+  x := Gpu {
+    mu: &mu,
     ir: interrupter,
-    lcdc: NewLcdc(*mu),
-    stat: NewStat(*mu),
-    scroll: NewScroll(*mu),
-    window: NewWindow(*mu),
-    palette: NewPalette(*mu),
-    palette0: NewObjPalette0(*mu),
-    palette1: NewObjPalette1(*mu),
-    line: NewLine(*mu),
+    lcdc: NewLcdc(mu),
+    stat: NewStat(mu),
+    scroll: NewScroll(mu),
+    window: NewWindow(mu),
+    palette: NewPalette(mu),
+    palette0: NewObjPalette0(mu),
+    palette1: NewObjPalette1(mu),
+    line: NewLine(mu),
     clock: 0,
-  })
-  (*x).lcdc.set((*x).lcdc.get() | (1 << 7)) //enable lcd
+  }
+  x.lcdc.set(x.lcdc.get() | (1 << 7)) //enable lcd
   return x
 }
 

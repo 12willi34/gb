@@ -18,7 +18,7 @@ type interrupter struct {
   processor cpu
 }
 
-func Interrupter(mu memoryunit, processor cpu) interrupter {
+func NewInterrupter(mu memoryunit, processor cpu) interrupter {
   return interrupter {
     mu: mu,
     processor: processor,

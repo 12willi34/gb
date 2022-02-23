@@ -9,39 +9,39 @@ const blank_cycles = 69833
 
 type GameBoy struct {
   Mu *memoryunit
-  Processor *cpu
-  timer *timer
-  interrupter *interrupter
-  gpu *Gpu
+  Cpu *cpu
+  Timer *timer
+  Interrupter *interrupter
+  Gpu *Gpu
 }
 
-func NewGameBoy(boot []byte, rom []byte) *GameBoy {
+func NewGameBoy(boot []byte, rom []byte) GameBoy {
   mu := NewMemoryUnit()
-  processor := NewCPU(boot, rom, &mu)
-  interrupter := Interrupter(mu, processor)
-  timer := Timer(mu, interrupter)
-  gpu := NewGpu(&mu, interrupter)
+  cpu := NewCPU(boot, rom, mu)
+  interrupter := NewInterrupter(mu, cpu)
+  timer := NewTimer(mu, interrupter)
+  gpu := NewGpu(mu, interrupter)
   gameboy := GameBoy {
     Mu: &mu,
-    Processor: &processor,
-    timer: &timer,
-    interrupter: &interrupter,
-    gpu: gpu,
+    Cpu: &cpu,
+    Timer: &timer,
+    Interrupter: &interrupter,
+    Gpu: &gpu,
   }
-  return &gameboy
+  return gameboy
 }
 
-func (this *GameBoy) Init() {
+func (this GameBoy) Init() {
   fmt.Println("starting gameboy")
   this.loop()
 }
 
-func (this *GameBoy) loop() {
+func (this GameBoy) loop() {
   for true {
-    steps := (*(*this).Processor).Step()
+    steps := this.Cpu.Step()
     if(steps == -1) { return }
-    (*(*this).gpu).Step(steps)
-    (*(*this).timer).Timing(steps)
-    (*(*this).interrupter).handle()
+    this.Gpu.Step(steps)
+    this.Timer.Timing(steps)
+    this.Interrupter.handle()
   }
 }
