@@ -21,14 +21,13 @@ func NewGameBoy(boot []byte, rom []byte) GameBoy {
   interrupter := NewInterrupter(mu, cpu)
   timer := NewTimer(mu, interrupter)
   gpu := NewGpu(mu, interrupter)
-  gameboy := GameBoy {
+  return GameBoy {
     Mu: &mu,
     Cpu: &cpu,
     Timer: &timer,
     Interrupter: &interrupter,
     Gpu: &gpu,
   }
-  return gameboy
 }
 
 func (this GameBoy) Init() {
