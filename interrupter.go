@@ -14,20 +14,20 @@ const joypad_flag = 4
 var flag_addr_table = []uint16{0x40, 0x48, 0x50, 0x58, 0x60}
 
 type interrupter struct {
-  bus memoryunit
+  mu memoryunit
   processor cpu
 }
 
 func Interrupter(mu memoryunit, processor cpu) interrupter {
   return interrupter {
-    bus: mu,
+    mu: mu,
     processor: processor,
   }
 }
 
 func (this *interrupter) set_flag(i int) {
-  new_flag_val := (*this).bus.Read_8(flag_register) | (1 << i)
-  (*this).bus.Write_8(flag_register, new_flag_val)
+  new_flag_val := (*this).mu.Read_8(flag_register) | (1 << i)
+  (*this).mu.Write_8(flag_register, new_flag_val)
 }
 
 func (this *interrupter) Request(flag int) {
@@ -46,9 +46,9 @@ func (this *interrupter) do_interrupt(i int) {
 
 func (this *interrupter) handle() {
   if((*this).processor.Interrupt) {
-    inter_f := (*this).bus.Read_8(flag_register)
+    inter_f := (*this).mu.Read_8(flag_register)
     if(inter_f > 0) {
-      inter_e := (*this).bus.Read_8(enable_register)
+      inter_e := (*this).mu.Read_8(enable_register)
       for i := 0; i < 5; i++ {
         if(this.check_interrupt(inter_f, inter_e, i)) {
           this.do_interrupt(i)

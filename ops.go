@@ -56,9 +56,9 @@ func INC_L(this *cpu) int {
 }
 
 func INC_HL(this *cpu) int {
-  val_before := (*(*this).memory).Read_8((*this).hl.value)
+  val_before := (*(*this).mu).Read_8((*this).hl.value)
   val_after := this.increment(val_before)
-  (*(*this).memory).Write_8((*this).hl.value, val_after)
+  (*(*this).mu).Write_8((*this).hl.value, val_after)
   return 12
 }
 
@@ -103,7 +103,7 @@ func LD_A_L(this *cpu) int {
 }
 
 func LD_A_HL(this *cpu) int {
-  (*this).af.w_high((*this).memory.Read_8((*this).hl.value))
+  (*this).af.w_high((*this).mu.Read_8((*this).hl.value))
   return 8
 }
 
@@ -114,31 +114,31 @@ func LD_B_B(this *cpu) int {
 
 func LD_n_A(this *cpu) int {
   i := 0xff00 + uint16(this.fetch())
-  (*this.memory).Write_8(i, this.af.r_high())
+  (*this.mu).Write_8(i, this.af.r_high())
   return 12
 }
 
 func LD_A_n(this *cpu) int {
-  a := (*this.memory).Read_8(0xff00 + uint16(this.fetch()))
+  a := (*this.mu).Read_8(0xff00 + uint16(this.fetch()))
   this.af.w_high(a)
   return 12
 }
 
 func LD_A_BC(this *cpu) int {
   val := (*this).bc.value
-  (*this).af.w_high((*this).memory.Read_8(val))
+  (*this).af.w_high((*this).mu.Read_8(val))
   return 8
 }
 
 func LD_A_DE(this *cpu) int {
   val := (*this).de.value
-  (*this).af.w_high((*this).memory.Read_8(val))
+  (*this).af.w_high((*this).mu.Read_8(val))
   return 8
 }
 
 func LD_A_nn(this *cpu) int {
   val := this.fetch_16()
-  (*this).af.w_high((*this).memory.Read_8(val))
+  (*this).af.w_high((*this).mu.Read_8(val))
   return 16
 }
 
@@ -194,7 +194,7 @@ func LD_L_n(this *cpu) int {
 
 func LD_A_ff00_C(this *cpu) int {
   i := 0xff00 + uint16((*this).bc.r_low())
-  val := (*(*this).memory).Read_8(i)
+  val := (*(*this).mu).Read_8(i)
   (*this).af.w_high(val)
   return 8
 }
@@ -202,35 +202,35 @@ func LD_A_ff00_C(this *cpu) int {
 func LD_ff00_C_A(this *cpu) int {
   a := (*this).af.r_high()
   i := 0xff00 + uint16((*this).bc.r_low())
-  (*(*this).memory).Write_8(i, a)
+  (*(*this).mu).Write_8(i, a)
   return 8
 }
 
 func LD_HL_A(this *cpu) int {
   a := (*this).af.r_high()
   b := (*this).hl.value
-  (*(*this).memory).Write_8(b, a)
+  (*(*this).mu).Write_8(b, a)
   return 8
 }
 
 func LD_BC_A(this *cpu) int {
   a := (*this).af.r_high()
   b := (*this).bc.value
-  (*(*this).memory).Write_8(b, a)
+  (*(*this).mu).Write_8(b, a)
   return 8
 }
 
 func LD_DE_A(this *cpu) int {
   a := (*this).af.r_high()
   b := (*this).de.value
-  (*(*this).memory).Write_8(b, a)
+  (*(*this).mu).Write_8(b, a)
   return 8
 }
 
 func LD_nn_A(this *cpu) int {
   a := (*this).af.r_high()
   b := this.fetch_16()
-  (*(*this).memory).Write_8(b, a)
+  (*(*this).mu).Write_8(b, a)
   return 16
 }
 
@@ -241,7 +241,7 @@ func LD_C_A(this *cpu) int {
 
 func LDD_HL_A(this *cpu) int {
   hl := (*this).hl.value
-  (*(*this).memory).Write_8(hl, (*this).af.r_high())
+  (*(*this).mu).Write_8(hl, (*this).af.r_high())
   (*this).hl.value = hl - 1
   return 8
 }
@@ -357,7 +357,7 @@ func SBC_A_L(this *cpu) int {
 
 func SBC_A_HL(this *cpu) int {
   a := (*this).af.r_high()
-  b := (*this).memory.Read_8((*this).hl.value)
+  b := (*this).mu.Read_8((*this).hl.value)
   (*this).af.w_high(this.subtract_carry(a, b))
   return 8
 }
@@ -454,7 +454,7 @@ func XOR_L(this *cpu) int {
 
 func XOR_HL(this *cpu) int {
   t := *this
-  hl := (*(t.memory)).Read_8(t.hl.value)
+  hl := (*(t.mu)).Read_8(t.hl.value)
   t.af.w_high(this.xor(t.af.r_high(), hl))
   return 8
 }

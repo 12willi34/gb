@@ -1,7 +1,7 @@
 package gb
 
 import (
-  "fmt"
+  //"fmt"
 )
 
 const width = 160

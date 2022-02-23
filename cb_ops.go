@@ -41,7 +41,7 @@ func SWAP_L(this *cpu) int {
 
 func SWAP_HL(this *cpu) int {
   addr := (*this).hl.value
-  (*(*this).memory).Write_8(addr, this.swap((*(*this).memory).Read_8(addr)))
+  (*(*this).mu).Write_8(addr, this.swap((*(*this).mu).Read_8(addr)))
   return 16
 }
 

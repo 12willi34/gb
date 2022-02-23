@@ -5,7 +5,7 @@ import (
 )
 
 type cpu struct {
-	memory *memoryunit
+	mu *memoryunit
   Interrupt bool
 	af Register
 	bc Register
@@ -19,7 +19,7 @@ type cpu struct {
 
 func NewCPU(boot []byte, rom []byte, mu *memoryunit) cpu {
 	res := cpu {
-		memory: mu,
+		mu: mu,
     Interrupt: false,
 		af: Register {value: 0x01B0,},
 		bc: Register {value: 0x0013,},
@@ -31,16 +31,16 @@ func NewCPU(boot []byte, rom []byte, mu *memoryunit) cpu {
   res.ops = (&res).init_ops()
   res.cb_ops = (&res).init_cb_ops()
 	for i := 0; i < 0x100; i++ {
-		(*res.memory).Write_8(uint16(i), boot[i])
+		(*res.mu).Write_8(uint16(i), boot[i])
 	}
 	for i := 0; i < len(rom); i++ {
-		(*res.memory).Write_8(uint16(i + 0x100), rom[i])
+		(*res.mu).Write_8(uint16(i + 0x100), rom[i])
 	}
 	return res
 }
 
 func (this *cpu) fetch() uint8 {
-	op := (*this.memory).Read_8(this.pc.value)
+	op := (*this.mu).Read_8(this.pc.value)
 	(*this).pc.value += 1
 	return op
 }
@@ -52,14 +52,14 @@ func (this *cpu) fetch_16() uint16 {
 }
 
 func (this *cpu) popStack() uint16 {
-	x := (*this.memory).Read_16(this.sp.value)
+	x := (*this.mu).Read_16(this.sp.value)
 	this.sp.value += 2
 	return x
 }
 
 func (this *cpu) pushStack(a uint16) {
-  (*this).memory.Write_8((*this).sp.value - 1, uint8(uint16(a & 0xFF) >> 8))
-  (*this).memory.Write_8((*this).sp.value - 2, uint8(a & 0xFF))
+  (*this).mu.Write_8((*this).sp.value - 1, uint8(uint16(a & 0xFF) >> 8))
+  (*this).mu.Write_8((*this).sp.value - 2, uint8(a & 0xFF))
   (*this).sp.value -= 2
 }
 
