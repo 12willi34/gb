@@ -20,3 +20,5 @@ opcodes table
   https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
 js implementation/guide
   http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-GPU-Timings
+yt tuturial (c++ implementation)
+  https://github.com/rockytriton/LLD_gbemu
