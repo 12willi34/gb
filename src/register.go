@@ -28,9 +28,9 @@ func (this *Register) w_high(data uint8) {
 
 func (this *cpu) _set_f(set bool, flag int) {
   if(set) {
-    this.af.w_low(this.af.r_low() | uint8(math.Pow(2, float64(flag))))
+    this.af.w_low(this.af.r_low() | (1 << flag))
   } else {
-    this.af.w_low(this.af.r_low() & ^uint8(math.Pow(2, float64(flag))))
+    this.af.w_low(this.af.r_low() & ^(1 << flag))
   }
 }
 

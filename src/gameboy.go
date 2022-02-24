@@ -37,7 +37,11 @@ func (this GameBoy) Init() {
 
 func (this GameBoy) loop() {
   for true {
-    steps := this.Cpu.Step()
+    steps := this.Cpu.Step_debug()
+    if(this.Cpu.pc.value == 0x100) {
+      fmt.Println("boot finished")
+      return
+    }
     if(steps == -1) { return }
     this.Gpu.Step(steps)
     this.Timer.Timing(steps)
