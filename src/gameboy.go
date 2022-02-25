@@ -13,6 +13,7 @@ type GameBoy struct {
   Timer *timer
   Interrupter *interrupter
   Gpu *Gpu
+  paused bool
 }
 
 func NewGameBoy(boot []byte, rom []byte) GameBoy {
@@ -27,6 +28,7 @@ func NewGameBoy(boot []byte, rom []byte) GameBoy {
     Timer: &timer,
     Interrupter: &interrupter,
     Gpu: &gpu,
+    paused: false,
   }
 }
 
@@ -36,8 +38,9 @@ func (this GameBoy) Init() {
 }
 
 func (this GameBoy) loop() {
-  for true {
-    steps := this.Cpu.Step_debug()
+  showWindow()
+  for(!this.paused) {
+    steps := this.Cpu.Step()
     if(this.Cpu.pc.value == 0x100) {
       fmt.Println("boot finished")
       return
