@@ -1,5 +1,6 @@
 pandocs
   http://bgb.bircd.org/pandocs.htm
+  https://gbdev.io/pandocs
 high level guide
   https://raphaelstaebler.medium.com/building-a-gameboy-from-scratch-part-2-the-cpu-d6986a5c6c74
 cpu register init
