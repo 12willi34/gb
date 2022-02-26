@@ -38,7 +38,6 @@ func (this GameBoy) Init() {
 }
 
 func (this GameBoy) loop() {
-  showWindow()
   for(!this.paused) {
     steps := this.Cpu.Step()
     if(this.Cpu.pc.value == 0x100) {

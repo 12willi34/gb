@@ -1,7 +1,6 @@
 package gb
 
 import (
-  //"fmt"
 )
 
 const width = 160
@@ -14,6 +13,10 @@ const data_mode = uint8(3)
 type Gpu struct {
   mu *memoryunit
   ir interrupter
+  clock int
+
+  //registers
+  line Line
   lcdc Lcdc
   stat Stat
   scroll Scroll
@@ -21,14 +24,15 @@ type Gpu struct {
   palette Palette
   palette0 ObjPalette0
   palette1 ObjPalette1
-  line Line
-  clock int
 }
 
 func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
   x := Gpu {
     mu: &mu,
     ir: interrupter,
+    clock: 0,
+
+    //registers
     lcdc: NewLcdc(mu),
     stat: NewStat(mu),
     scroll: NewScroll(mu),
@@ -37,7 +41,6 @@ func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
     palette0: NewObjPalette0(mu),
     palette1: NewObjPalette1(mu),
     line: NewLine(mu),
-    clock: 0,
   }
   x.lcdc.set(x.lcdc.get() | (1 << 7)) //enable lcd
   return x
@@ -48,11 +51,32 @@ func (this *Gpu) clearScreen() {
 }
 
 func (this *Gpu) scanline(line uint8) {
+  ctrl := (*this).lcdc.get()
+  if((ctrl & (1 << 0)) > 0) {
+    this.renderTiles()
+  }
+  if((ctrl & (1 << 1)) > 0) {
+    this.renderSprites()
+  }
+}
+
+func (this *Gpu) renderTiles() {
+  //todo
+}
+
+func (this *Gpu) renderSprites() {
   //todo
 }
 
 func (this *Gpu) hdma_transfer() {
-  //todo
+  if((*(*this).mu).dma_status) {
+    source := uint16((*(*this).mu).dma_val) << 8
+    for i := uint16(0); i <= 0xa0; i++ {
+      val := (*(*this).mu).Read_8(source + i)
+      (*(*this).mu).Write_8(0xfe00 + i, val)
+    }
+    (*(*this).mu).dma_status = false
+  }
 }
 
 func (this *Gpu) updateRegisters() {
@@ -100,9 +124,7 @@ func (this *Gpu) updateRegisters() {
       }
   }
 
-  if(interrupt) {
-    (*this).ir.Request(1)
-  }
+  if(interrupt) { (*this).ir.Request(1) }
 
   if((*this).line.get() == (*this).line.get_c()) {
     (*this).stat.set((*this).stat.get() | (1 << 2))

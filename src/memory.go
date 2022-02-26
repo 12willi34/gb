@@ -4,11 +4,15 @@ import ()
 
 type memoryunit struct {
 	addr []uint8
+  dma_val uint8
+  dma_status bool
 }
 
 func NewMemoryUnit() memoryunit {
 	mu := memoryunit {
 		addr: make([]uint8, 0x10000),
+    dma_val: 0,
+    dma_status: false,
 	}
   /*
   mu.addr[0x04] = 0x1e
@@ -54,6 +58,10 @@ func (this memoryunit) Read_8(i uint16) uint8 {
 }
 
 func (this memoryunit) Write_8(i uint16, data uint8) {
+  if(i == 0xff46) {
+    this.dma_val = data
+    this.dma_status = true
+  }
 	this.addr[i] = data
 }
 
