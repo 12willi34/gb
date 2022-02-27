@@ -25,6 +25,7 @@ func showWindow() {
   surface.FillRect(&rect, 0xffff0000)
   window.UpdateSurface()
 
+  /*
   running := true
   for(running) {
     for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -36,4 +37,5 @@ func showWindow() {
       }
     }
   }
+  */
 }

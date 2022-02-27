@@ -102,6 +102,11 @@ func INC_HL_mem(this *cpu) int {
   return 12
 }
 
+func LD_SP_HL(this *cpu) int {
+  (*this).sp.value = (*this).hl.value
+  return 8
+}
+
 func LD_B_n(this *cpu) int {
   (*this).bc.w_high(this.fetch())
   return 8
@@ -800,6 +805,7 @@ func (this *cpu) init_ops() [0x100]func(*cpu) int {
   ops[0xf2] = LD_A_ff00_C
   ops[0xf3] = DI
   ops[0xf7] = RST_30
+  ops[0xf9] = LD_SP_HL
   ops[0xfa] = LD_A_nn
   ops[0xfb] = EI
   ops[0xfe] = CP_n
