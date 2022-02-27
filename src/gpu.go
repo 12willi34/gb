@@ -14,6 +14,7 @@ type Gpu struct {
   mu *memoryunit
   ir interrupter
   clock int
+  buffer [width][height]uint8
 
   //registers
   line Line
@@ -31,6 +32,7 @@ func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
     mu: &mu,
     ir: interrupter,
     clock: 0,
+    buffer: [width][height]uint8{},
 
     //registers
     lcdc: NewLcdc(mu),
@@ -60,8 +62,77 @@ func (this *Gpu) scanline(line uint8) {
   }
 }
 
+/**
+ * bit 3 - background tile map area
+ *  0: 0x9800 - 0x9bff
+ *  1: 0x9c00 - 0x9fff
+ * bit 4 - tile data area
+ *  0: 0x8800 - 0x97ff
+ *  1: 0x8000 - 0x8fff
+ * bit 6 - window tile map area
+ *  0: 0x9800 - 0x9bff
+ *  1: 0x9c00 - 0x9fff
+ **/
 func (this *Gpu) renderTiles() {
-  //todo
+  sx := (*this).scroll.get_x()
+  sy := (*this).scroll.get_y()
+  wx := (*this).window.get_x() - 7
+  wy := (*this).window.get_y()
+
+  in_window := (((*this).lcdc.get() & (1 << 5)) > 0) && (wy <= (*this).line.get())
+
+  tile_start := uint16(0x8800)
+  unsigned_tile_address := false
+  if(((*this).lcdc.get() & (1 << 4)) > 0) {
+    tile_start = 0x8000
+    unsigned_tile_address = true
+  }
+
+  var background_start uint16
+  var ctrl_bit uint8
+  if(in_window) {
+    ctrl_bit = 3
+  } else {
+    ctrl_bit = 6
+  }
+  if(((*this).lcdc.get() & (1 << ctrl_bit)) > 0) {
+    background_start = 0x9c00
+  } else {
+    background_start = 0x9800
+  }
+
+  yPos := (*this).line.get()
+  if(in_window) {
+    yPos -= wy
+  } else {
+    yPos += sy
+  }
+  row := uint16(uint8(yPos/8)*32)
+  for x := uint8(0); x < 160; x++ {
+    xPos := sx + x
+    if(in_window && x >= wx) {
+      xPos = x - wx
+    }
+    col := uint16(xPos/8)
+    var tile_addr uint16
+    if(unsigned_tile_address) {
+      tile_addr = tile_start + (uint16(background_start + row + col)*16)
+    } else {
+      tile_addr = tile_start + ((uint16(int16(background_start) + int16(row) + int16(col)) + uint16(128))*16)
+    }
+    line := uint16((yPos % 8)*2) //nicht sicher ob das richtig ist
+    val0 := (*(*this).mu).Read_8(tile_addr + line)
+    val1 := (*(*this).mu).Read_8(tile_addr + line + 1)
+    colour_bit := (int(xPos % 8) - 7)*(- 1) //nicht sicher ob das richtig ist v2
+    colour := uint8(0)
+    if((val0 & (1 << colour_bit)) > 0) {
+      colour |= 1 << 1
+    }
+    if((val1 & (1 << colour_bit)) > 0) {
+      colour |= 1
+    }
+    (*this).buffer[x][(*this).line.get()] = colour
+  }
 }
 
 func (this *Gpu) renderSprites() {
@@ -96,6 +167,16 @@ func (this *Gpu) updateRegisters() {
         line := (*this).line.inc()
         if(line >= height) {
           interrupt = (*this).stat.set_mode(vblank_mode)
+          /*
+          for y := 0; y < 144; y++ {
+            for x := 0; x < 160; x++ {
+              print((*this).buffer[x][y])
+            }
+            println()
+          }
+          println()
+          println()
+          */
         } else {
           this.scanline(line)
           interrupt = (*this).stat.set_mode(oam_mode)
