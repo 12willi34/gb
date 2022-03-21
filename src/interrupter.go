@@ -1,9 +1,5 @@
 package gb
 
-import (
-  //"fmt"
-)
-
 const enable_register = 0xffff
 const flag_register = 0xff0f
 const vblank_flag = 0
@@ -35,11 +31,17 @@ func (this *interrupter) Request(flag int) {
 }
 
 func (this *interrupter) check_interrupt(inter_f uint8, inter_e uint8, i int) bool {
-  return (1 & (inter_f << i) == 1) && (1 & (inter_e << i) == 1)
+  b := uint8(1 << i)
+  return (((b & inter_f) > 0) && ((b & inter_e) > 0))
 }
 
 func (this *interrupter) do_interrupt(i int) {
   (*this).processor.Interrupt = false
+  (*this).processor.Halt = false
+
+  updated_flags := (*this).mu.Read_8(flag_register) & ^uint8(1 << i)
+  (*this).mu.Write_8(flag_register, updated_flags)
+
   (*this).processor.pushStack((*this).processor.pc.value)
   (*this).processor.pc.value = flag_addr_table[i]
 }
@@ -52,7 +54,6 @@ func (this *interrupter) handle() {
       for i := 0; i < 5; i++ {
         if(this.check_interrupt(inter_f, inter_e, i)) {
           this.do_interrupt(i)
-          this.processor.Interrupt = false
           return
         }
       }

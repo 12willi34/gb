@@ -97,6 +97,60 @@ func RL_L(this *cpu) int {
   return 8
 }
 
+func SRL_A(this *cpu) int {
+  (*this).af.w_high(this.srl((*this).af.r_high()))
+  return 8
+}
+
+func SRL_B(this *cpu) int {
+  (*this).bc.w_high(this.srl((*this).bc.r_high()))
+  return 8
+}
+
+func SRL_C(this *cpu) int {
+  (*this).bc.w_low(this.srl((*this).bc.r_low()))
+  return 8
+}
+
+func SRL_D(this *cpu) int {
+  (*this).de.w_high(this.srl((*this).de.r_high()))
+  return 8
+}
+
+func SRL_E(this *cpu) int {
+  (*this).de.w_low(this.srl((*this).de.r_low()))
+  return 8
+}
+
+func SRL_H(this *cpu) int {
+  (*this).hl.w_high(this.srl((*this).hl.r_high()))
+  return 8
+}
+
+func SRL_L(this *cpu) int {
+  (*this).hl.w_low(this.srl((*this).hl.r_low()))
+  return 8
+}
+
+func SRL_HL(this *cpu) int {
+  val := (*(*this).mu).Read_8((*this).hl.value)
+  val = this.srl(val)
+  (*(*this).mu).Write_8((*this).hl.value, val)
+  return 16
+}
+
+func RES_1_H(this *cpu) int {
+  val := (*this).hl.r_high() & ^uint8(1 << 1)
+  (*this).hl.w_high(val)
+  return 8
+}
+
+func RES_0_A(this *cpu) int {
+  val := (*this).af.r_high() & ^uint8(1 << 0)
+  (*this).af.w_high(val)
+  return 8
+}
+
 func (this *cpu) init_cb_ops() [0x100]func(*cpu) int {
   var cb_ops [0x100]func(*cpu) int
   cb_ops[0x10] = RL_B
@@ -114,6 +168,17 @@ func (this *cpu) init_cb_ops() [0x100]func(*cpu) int {
   cb_ops[0x34] = SWAP_H
   cb_ops[0x35] = SWAP_L
   cb_ops[0x36] = SWAP_HL
+  cb_ops[0x38] = SRL_B
+  cb_ops[0x39] = SRL_C
+  cb_ops[0x3a] = SRL_D
+  cb_ops[0x3b] = SRL_E
+  cb_ops[0x3c] = SRL_H
+  cb_ops[0x3d] = SRL_L
+  cb_ops[0x3e] = SRL_HL
+  cb_ops[0x3f] = SRL_A
   cb_ops[0x7c] = BIT_7_H
+  cb_ops[0x8c] = RES_1_H
+  cb_ops[0x87] = RES_0_A
   return cb_ops
 }
+

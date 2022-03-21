@@ -68,10 +68,10 @@ func (this Stat) get_vblank() bool {
 
 /* Line */
 
-type Line struct { mu memoryunit }
+type Line struct { mu *memoryunit }
 
 func NewLine(mu memoryunit) Line {
-  return Line { mu: mu, }
+  return Line { mu: &mu, }
 }
 
 func (this Line) inc() uint8 {
@@ -84,7 +84,7 @@ func (this Line) get() uint8 {
 }
 
 func (this Line) set(val uint8) {
-  this.mu.Write_8(ly, val)
+  this.mu.addr[ly] = val
 }
 
 func (this Line) get_c() uint8 {
