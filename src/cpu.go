@@ -2,6 +2,8 @@ package gb
 
 import (
   "fmt"
+  "bufio"
+  "os"
 )
 
 type cpu struct {
@@ -14,8 +16,6 @@ type cpu struct {
   hl Register
   sp Register //stack pointer
   pc Register //program counter
-  ops [0x100]func(*cpu) int
-  cb_ops [0x100]func(*cpu) int
 }
 
 func NewCPU(mu memoryunit) cpu {
@@ -30,8 +30,6 @@ func NewCPU(mu memoryunit) cpu {
     sp: Register {value: 0x0000,},
     pc: Register {value: 0x0000,},
   }
-  res.ops = (&res).init_ops()
-  res.cb_ops = (&res).init_cb_ops()
   return res
 }
 
@@ -230,34 +228,45 @@ func (this *cpu) srl(a uint8) uint8 {
 
 func (this *cpu) Step() int {
   if((*this).Halt) { return 4 }
+  var cycles = -1
   op := this.fetch()
-  f := (*this).ops[op]
-  if(f == nil) {
+  if(op == 0xcb) {
+    cb_op := this.fetch()
+    cycles = this.do_cb_op(cb_op)
+  } else {
+    cycles = this.do_op(op)
+  }
+  if(cycles == -1) {
     fmt.Printf("opcode not implemented: %x\n", op)
     return -1
   }
-  return f(this)
+  return cycles
 }
+
+var reader = bufio.NewReader(os.Stdin)
 
 func (this *cpu) Step_debug() int {
   if((*this).Halt) { return 4 }
+  var cycles = -1
   op := this.fetch()
-  f := (*this).ops[op]
-  if(f == nil) {
-    fmt.Printf("opcode not implemented: %x\n", op)
-    return -1
-  }
   if(op == 0xcb) {
-    fmt.Printf("opcode: cb %02x\n", (*this).mu.Read_8((*this).pc.value))
+    cb_op := this.fetch()
+    cycles = this.do_cb_op(cb_op)
+    fmt.Printf("opcode: cb %02x\n", cb_op)
   } else {
+    cycles = this.do_op(op)
     fmt.Printf("opcode: %02x\n", op)
   }
-  steps := f(this)
+  if(cycles == -1) {
+    fmt.Printf("opcode not implemented")
+    return -1
+  }
   fmt.Printf("af: %04x\n", (*this).af.value)
   fmt.Printf("bc: %04x\n", (*this).bc.value)
   fmt.Printf("de: %04x\n", (*this).de.value)
   fmt.Printf("hl: %04x\n", (*this).hl.value)
   fmt.Printf("sp: %04x\n", (*this).sp.value)
   fmt.Printf("pc: %04x\n\n", (*this).pc.value)
-  return steps
+  reader.ReadString('\n')
+  return cycles
 }

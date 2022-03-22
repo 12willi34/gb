@@ -1189,10 +1189,6 @@ func POP_HL(this *cpu) int {
   return 12
 }
 
-func CB_OP(this *cpu) int {
-  return ((*this).cb_ops[this.fetch()])(this)
-}
-
 func CP_A_A(this *cpu) int {
   this.compare_8(this.af.r_high(), this.af.r_high())
   return 4
@@ -1458,263 +1454,520 @@ func CPL(this *cpu) int {
   return 4
 }
 
-func (this *cpu) init_ops() [0x100]func(*cpu) int {
-  var ops [0x100]func(*cpu) int
-  ops[0x00] = NOOP
-  ops[0x01] = LD_BC_nn
-  ops[0x02] = LD_BC_A
-  ops[0x03] = INC_BC
-  ops[0x04] = INC_B
-  ops[0x05] = DEC_B
-  ops[0x06] = LD_B_n
-  ops[0x07] = RLCA
-  ops[0x08] = LD_number_SP
-  ops[0x09] = ADD_HL_BC
-  ops[0x0a] = LD_A_BC
-  ops[0x0c] = INC_C
-  ops[0x0b] = DEC_BC
-  ops[0x0d] = DEC_C
-  ops[0x0e] = LD_C_n
-  ops[0x0f] = RRCA
-  ops[0x10] = STOP
-  ops[0x11] = LD_DE_nn
-  ops[0x12] = LD_DE_A
-  ops[0x13] = INC_DE
-  ops[0x14] = INC_D
-  ops[0x15] = DEC_D
-  ops[0x16] = LD_D_n
-  ops[0x17] = RLA
-  ops[0x18] = JR_n
-  ops[0x19] = ADD_HL_DE
-  ops[0x1a] = LD_A_DE
-  ops[0x1b] = DEC_DE
-  ops[0x1c] = INC_E
-  ops[0x1d] = DEC_E
-  ops[0x1e] = LD_E_n
-  ops[0x20] = JR_nZ
-  ops[0x21] = LD_HL_nn
-  ops[0x22] = LDI_HL_A
-  ops[0x23] = INC_HL
-  ops[0x24] = INC_H
-  ops[0x25] = DEC_H
-  ops[0x26] = LD_H_n
-  ops[0x27] = DAA
-  ops[0x28] = JR_Z
-  ops[0x29] = ADD_HL_HL
-  ops[0x2a] = LD_A_HLI
-  ops[0x2b] = DEC_HL
-  ops[0x2c] = INC_L
-  ops[0x2d] = DEC_L
-  ops[0x2e] = LD_L_n
-  ops[0x2f] = CPL
-  ops[0x30] = JR_nC
-  ops[0x31] = LD_SP_nn
-  ops[0x32] = LDD_HL_A
-  ops[0x33] = INC_SP
-  ops[0x34] = INC_HL_mem
-  ops[0x35] = DEC_HLadr
-  ops[0x36] = LD_HL_number
-  ops[0x37] = SCF
-  ops[0x38] = JR_C
-  ops[0x39] = ADD_HL_SP
-  ops[0x3a] = LDD_A_HL
-  ops[0x3b] = DEC_SP
-  ops[0x3c] = INC_A
-  ops[0x3d] = DEC_A
-  ops[0x3e] = LD_A_number
-  ops[0x3f] = CCF
-  ops[0x40] = LD_B_B
-  ops[0x41] = LD_B_C
-  ops[0x42] = LD_B_D
-  ops[0x43] = LD_B_E
-  ops[0x44] = LD_B_H
-  ops[0x45] = LD_B_L
-  ops[0x46] = LD_B_HL
-  ops[0x47] = LD_B_A
-  ops[0x48] = LD_C_B
-  ops[0x49] = LD_C_C
-  ops[0x4a] = LD_C_D
-  ops[0x4b] = LD_C_E
-  ops[0x4c] = LD_C_H
-  ops[0x4d] = LD_C_L
-  ops[0x4e] = LD_C_HL
-  ops[0x4f] = LD_C_A
-  ops[0x50] = LD_D_B
-  ops[0x51] = LD_D_C
-  ops[0x52] = LD_D_D
-  ops[0x53] = LD_D_E
-  ops[0x54] = LD_D_H
-  ops[0x55] = LD_D_L
-  ops[0x56] = LD_D_HL
-  ops[0x57] = LD_D_A
-  ops[0x58] = LD_E_B
-  ops[0x59] = LD_E_C
-  ops[0x5a] = LD_E_D
-  ops[0x5b] = LD_E_E
-  ops[0x5c] = LD_E_H
-  ops[0x5d] = LD_E_L
-  ops[0x5e] = LD_E_HL
-  ops[0x5f] = LD_E_A
-  ops[0x60] = LD_H_B
-  ops[0x61] = LD_H_C
-  ops[0x62] = LD_H_D
-  ops[0x63] = LD_H_E
-  ops[0x64] = LD_H_H
-  ops[0x65] = LD_H_L
-  ops[0x66] = LD_H_HL
-  ops[0x67] = LD_H_A
-  ops[0x68] = LD_L_B
-  ops[0x69] = LD_L_C
-  ops[0x6a] = LD_L_D
-  ops[0x6b] = LD_L_E
-  ops[0x6c] = LD_L_H
-  ops[0x6d] = LD_L_L
-  ops[0x6e] = LD_L_HL
-  ops[0x6f] = LD_L_A
-  ops[0x70] = LD_HL_B
-  ops[0x71] = LD_HL_C
-  ops[0x72] = LD_HL_D
-  ops[0x73] = LD_HL_E
-  ops[0x74] = LD_HL_H
-  ops[0x75] = LD_HL_L
-  ops[0x76] = HALT
-  ops[0x77] = LD_HL_A
-  ops[0x78] = LD_A_B
-  ops[0x79] = LD_A_C
-  ops[0x7a] = LD_A_D
-  ops[0x7b] = LD_A_E
-  ops[0x7c] = LD_A_H
-  ops[0x7d] = LD_A_L
-  ops[0x7e] = LD_A_HL
-  ops[0x7f] = LD_A_A
-  ops[0x80] = ADD_A_B
-  ops[0x81] = ADD_A_C
-  ops[0x82] = ADD_A_D
-  ops[0x83] = ADD_A_E
-  ops[0x84] = ADD_A_H
-  ops[0x85] = ADD_A_L
-  ops[0x86] = ADD_A_HL_memory
-  ops[0x87] = ADD_A_A
-  ops[0x88] = ADC_A_B
-  ops[0x89] = ADC_A_C
-  ops[0x8a] = ADC_A_D
-  ops[0x8b] = ADC_A_E
-  ops[0x8c] = ADC_A_H
-  ops[0x8d] = ADC_A_L
-  ops[0x8e] = ADC_A_HL
-  ops[0x8f] = ADC_A_A
-  ops[0x90] = SUB_B
-  ops[0x91] = SUB_C
-  ops[0x92] = SUB_D
-  ops[0x93] = SUB_E
-  ops[0x94] = SUB_H
-  ops[0x95] = SUB_L
-  ops[0x96] = SUB_HL_memory
-  ops[0x97] = SUB_A
-  ops[0x98] = SBC_A_B
-  ops[0x99] = SBC_A_C
-  ops[0x9a] = SBC_A_D
-  ops[0x9b] = SBC_A_E
-  ops[0x9c] = SBC_A_H
-  ops[0x9d] = SBC_A_L
-  ops[0x9e] = SBC_A_HL
-  ops[0x9f] = SBC_A_A
-  ops[0xa0] = AND_A_B
-  ops[0xa1] = AND_A_C
-  ops[0xa2] = AND_A_D
-  ops[0xa3] = AND_A_E
-  ops[0xa4] = AND_A_H
-  ops[0xa5] = AND_A_L
-  ops[0xa6] = AND_A_HL
-  ops[0xa7] = AND_A_A
-  ops[0xa8] = XOR_B
-  ops[0xa9] = XOR_C
-  ops[0xaa] = XOR_D
-  ops[0xab] = XOR_E
-  ops[0xac] = XOR_H
-  ops[0xad] = XOR_L
-  ops[0xae] = XOR_HL
-  ops[0xaf] = XOR_A
-  ops[0xb0] = OR_A_B
-  ops[0xb1] = OR_A_C
-  ops[0xb2] = OR_A_D
-  ops[0xb3] = OR_A_E
-  ops[0xb4] = OR_A_H
-  ops[0xb5] = OR_A_L
-  ops[0xb6] = OR_A_HL
-  ops[0xb7] = OR_A_A
-  ops[0xb8] = CP_A_B
-  ops[0xb9] = CP_A_C
-  ops[0xba] = CP_A_D
-  ops[0xbb] = CP_A_E
-  ops[0xbc] = CP_A_H
-  ops[0xbd] = CP_A_L
-  ops[0xbe] = CP_HL_memory
-  ops[0xbf] = CP_A_A
-  ops[0xc0] = RET_NZ
-  ops[0xc1] = POP_BC
-  ops[0xc2] = JP_NZ_number
-  ops[0xc3] = JP
-  ops[0xc4] = CALL_NZ_number
-  ops[0xc5] = PUSH_BC
-  ops[0xc6] = ADD_A_number
-  ops[0xc7] = RST_00
-  ops[0xc8] = RET_Z
-  ops[0xc9] = RET
-  ops[0xca] = JP_Z_number
-  ops[0xcb] = CB_OP
-  ops[0xcc] = CALL_Z_number
-  ops[0xcd] = CALL
-  ops[0xce] = ADC_A_number
-  ops[0xcf] = RST_08
-  ops[0xd0] = RET_NC
-  ops[0xd1] = POP_DE
-  ops[0xd2] = JP_NC_number
-  ops[0xd3] = NOOP
-  ops[0xd4] = CALL_C_number
-  ops[0xd5] = PUSH_DE
-  ops[0xd6] = SUB_number
-  ops[0xd7] = RST_10
-  ops[0xd8] = RET_C
-  ops[0xd9] = RETI
-  ops[0xda] = JP_C_number
-  ops[0xdb] = NOOP
-  ops[0xdc] = CALL_C_number
-  ops[0xdd] = NOOP
-  ops[0xde] = SBC_A_number
-  ops[0xdf] = RST_18
-  ops[0xe0] = LD_n_A
-  ops[0xe1] = POP_HL
-  ops[0xe2] = LD_ff00_C_A
-  ops[0xe3] = NOOP
-  ops[0xe4] = NOOP
-  ops[0xe5] = PUSH_HL
-  ops[0xe6] = AND_A_number
-  ops[0xe7] = RST_20
-  ops[0xe8] = ADD_SP_number
-  ops[0xe9] = JP_HL
-  ops[0xea] = LD_nn_A
-  ops[0xeb] = NOOP
-  ops[0xec] = NOOP
-  ops[0xed] = NOOP
-  ops[0xee] = XOR_number
-  ops[0xef] = RST_28
-  ops[0xf0] = LD_A_n
-  ops[0xf1] = POP_AF
-  ops[0xf2] = LD_A_ff00_C
-  ops[0xf3] = DI
-  ops[0xf4] = NOOP
-  ops[0xf5] = PUSH_AF
-  ops[0xf6] = OR_A_number
-  ops[0xf7] = RST_30
-  ops[0xf8] = LDHL_SP_number
-  ops[0xf9] = LD_SP_HL
-  ops[0xfa] = LD_A_nn
-  ops[0xfb] = EI
-  ops[0xfc] = NOOP
-  ops[0xfd] = NOOP
-  ops[0xfe] = CP_n
-  ops[0xff] = RST_38
-  return ops
+func (this *cpu) do_op(op uint8) int {
+  switch(op) {
+  case 0x00:
+    return NOOP(this)
+  case 0x01:
+    return LD_BC_nn(this)
+  case 0x02:
+    return LD_BC_A(this)
+  case 0x03:
+    return INC_BC(this)
+  case 0x04:
+    return INC_B(this)
+  case 0x05:
+    return DEC_B(this)
+  case 0x06:
+    return LD_B_n(this)
+  case 0x07:
+    return RLCA(this)
+  case 0x08:
+    return LD_number_SP(this)
+  case 0x09:
+    return ADD_HL_BC(this)
+  case 0x0a:
+    return LD_A_BC(this)
+  case 0x0c:
+    return INC_C(this)
+  case 0x0b:
+    return DEC_BC(this)
+  case 0x0d:
+    return DEC_C(this)
+  case 0x0e:
+    return LD_C_n(this)
+  case 0x0f:
+    return RRCA(this)
+  case 0x10:
+    return STOP(this)
+  case 0x11:
+    return LD_DE_nn(this)
+  case 0x12:
+    return LD_DE_A(this)
+  case 0x13:
+    return INC_DE(this)
+  case 0x14:
+    return INC_D(this)
+  case 0x15:
+    return DEC_D(this)
+  case 0x16:
+    return LD_D_n(this)
+  case 0x17:
+    return RLA(this)
+  case 0x18:
+    return JR_n(this)
+  case 0x19:
+    return ADD_HL_DE(this)
+  case 0x1a:
+    return LD_A_DE(this)
+  case 0x1b:
+    return DEC_DE(this)
+  case 0x1c:
+    return INC_E(this)
+  case 0x1d:
+    return DEC_E(this)
+  case 0x1e:
+    return LD_E_n(this)
+  case 0x20:
+    return JR_nZ(this)
+  case 0x21:
+    return LD_HL_nn(this)
+  case 0x22:
+    return LDI_HL_A(this)
+  case 0x23:
+    return INC_HL(this)
+  case 0x24:
+    return INC_H(this)
+  case 0x25:
+    return DEC_H(this)
+  case 0x26:
+    return LD_H_n(this)
+  case 0x27:
+    return DAA(this)
+  case 0x28:
+    return JR_Z(this)
+  case 0x29:
+    return ADD_HL_HL(this)
+  case 0x2a:
+    return LD_A_HLI(this)
+  case 0x2b:
+    return DEC_HL(this)
+  case 0x2c:
+    return INC_L(this)
+  case 0x2d:
+    return DEC_L(this)
+  case 0x2e:
+    return LD_L_n(this)
+  case 0x2f:
+    return CPL(this)
+  case 0x30:
+    return JR_nC(this)
+  case 0x31:
+    return LD_SP_nn(this)
+  case 0x32:
+    return LDD_HL_A(this)
+  case 0x33:
+    return INC_SP(this)
+  case 0x34:
+    return INC_HL_mem(this)
+  case 0x35:
+    return DEC_HLadr(this)
+  case 0x36:
+    return LD_HL_number(this)
+  case 0x37:
+    return SCF(this)
+  case 0x38:
+    return JR_C(this)
+  case 0x39:
+    return ADD_HL_SP(this)
+  case 0x3a:
+    return LDD_A_HL(this)
+  case 0x3b:
+    return DEC_SP(this)
+  case 0x3c:
+    return INC_A(this)
+  case 0x3d:
+    return DEC_A(this)
+  case 0x3e:
+    return LD_A_number(this)
+  case 0x3f:
+    return CCF(this)
+  case 0x40:
+    return LD_B_B(this)
+  case 0x41:
+    return LD_B_C(this)
+  case 0x42:
+    return LD_B_D(this)
+  case 0x43:
+    return LD_B_E(this)
+  case 0x44:
+    return LD_B_H(this)
+  case 0x45:
+    return LD_B_L(this)
+  case 0x46:
+    return LD_B_HL(this)
+  case 0x47:
+    return LD_B_A(this)
+  case 0x48:
+    return LD_C_B(this)
+  case 0x49:
+    return LD_C_C(this)
+  case 0x4a:
+    return LD_C_D(this)
+  case 0x4b:
+    return LD_C_E(this)
+  case 0x4c:
+    return LD_C_H(this)
+  case 0x4d:
+    return LD_C_L(this)
+  case 0x4e:
+    return LD_C_HL(this)
+  case 0x4f:
+    return LD_C_A(this)
+  case 0x50:
+    return LD_D_B(this)
+  case 0x51:
+    return LD_D_C(this)
+  case 0x52:
+    return LD_D_D(this)
+  case 0x53:
+    return LD_D_E(this)
+  case 0x54:
+    return LD_D_H(this)
+  case 0x55:
+    return LD_D_L(this)
+  case 0x56:
+    return LD_D_HL(this)
+  case 0x57:
+    return LD_D_A(this)
+  case 0x58:
+    return LD_E_B(this)
+  case 0x59:
+    return LD_E_C(this)
+  case 0x5a:
+    return LD_E_D(this)
+  case 0x5b:
+    return LD_E_E(this)
+  case 0x5c:
+    return LD_E_H(this)
+  case 0x5d:
+    return LD_E_L(this)
+  case 0x5e:
+    return LD_E_HL(this)
+  case 0x5f:
+    return LD_E_A(this)
+  case 0x60:
+    return LD_H_B(this)
+  case 0x61:
+    return LD_H_C(this)
+  case 0x62:
+    return LD_H_D(this)
+  case 0x63:
+    return LD_H_E(this)
+  case 0x64:
+    return LD_H_H(this)
+  case 0x65:
+    return LD_H_L(this)
+  case 0x66:
+    return LD_H_HL(this)
+  case 0x67:
+    return LD_H_A(this)
+  case 0x68:
+    return LD_L_B(this)
+  case 0x69:
+    return LD_L_C(this)
+  case 0x6a:
+    return LD_L_D(this)
+  case 0x6b:
+    return LD_L_E(this)
+  case 0x6c:
+    return LD_L_H(this)
+  case 0x6d:
+    return LD_L_L(this)
+  case 0x6e:
+    return LD_L_HL(this)
+  case 0x6f:
+    return LD_L_A(this)
+  case 0x70:
+    return LD_HL_B(this)
+  case 0x71:
+    return LD_HL_C(this)
+  case 0x72:
+    return LD_HL_D(this)
+  case 0x73:
+    return LD_HL_E(this)
+  case 0x74:
+    return LD_HL_H(this)
+  case 0x75:
+    return LD_HL_L(this)
+  case 0x76:
+    return HALT(this)
+  case 0x77:
+    return LD_HL_A(this)
+  case 0x78:
+    return LD_A_B(this)
+  case 0x79:
+    return LD_A_C(this)
+  case 0x7a:
+    return LD_A_D(this)
+  case 0x7b:
+    return LD_A_E(this)
+  case 0x7c:
+    return LD_A_H(this)
+  case 0x7d:
+    return LD_A_L(this)
+  case 0x7e:
+    return LD_A_HL(this)
+  case 0x7f:
+    return LD_A_A(this)
+  case 0x80:
+    return ADD_A_B(this)
+  case 0x81:
+    return ADD_A_C(this)
+  case 0x82:
+    return ADD_A_D(this)
+  case 0x83:
+    return ADD_A_E(this)
+  case 0x84:
+    return ADD_A_H(this)
+  case 0x85:
+    return ADD_A_L(this)
+  case 0x86:
+    return ADD_A_HL_memory(this)
+  case 0x87:
+    return ADD_A_A(this)
+  case 0x88:
+    return ADC_A_B(this)
+  case 0x89:
+    return ADC_A_C(this)
+  case 0x8a:
+    return ADC_A_D(this)
+  case 0x8b:
+    return ADC_A_E(this)
+  case 0x8c:
+    return ADC_A_H(this)
+  case 0x8d:
+    return ADC_A_L(this)
+  case 0x8e:
+    return ADC_A_HL(this)
+  case 0x8f:
+    return ADC_A_A(this)
+  case 0x90:
+    return SUB_B(this)
+  case 0x91:
+    return SUB_C(this)
+  case 0x92:
+    return SUB_D(this)
+  case 0x93:
+    return SUB_E(this)
+  case 0x94:
+    return SUB_H(this)
+  case 0x95:
+    return SUB_L(this)
+  case 0x96:
+    return SUB_HL_memory(this)
+  case 0x97:
+    return SUB_A(this)
+  case 0x98:
+    return SBC_A_B(this)
+  case 0x99:
+    return SBC_A_C(this)
+  case 0x9a:
+    return SBC_A_D(this)
+  case 0x9b:
+    return SBC_A_E(this)
+  case 0x9c:
+    return SBC_A_H(this)
+  case 0x9d:
+    return SBC_A_L(this)
+  case 0x9e:
+    return SBC_A_HL(this)
+  case 0x9f:
+    return SBC_A_A(this)
+  case 0xa0:
+    return AND_A_B(this)
+  case 0xa1:
+    return AND_A_C(this)
+  case 0xa2:
+    return AND_A_D(this)
+  case 0xa3:
+    return AND_A_E(this)
+  case 0xa4:
+    return AND_A_H(this)
+  case 0xa5:
+    return AND_A_L(this)
+  case 0xa6:
+    return AND_A_HL(this)
+  case 0xa7:
+    return AND_A_A(this)
+  case 0xa8:
+    return XOR_B(this)
+  case 0xa9:
+    return XOR_C(this)
+  case 0xaa:
+    return XOR_D(this)
+  case 0xab:
+    return XOR_E(this)
+  case 0xac:
+    return XOR_H(this)
+  case 0xad:
+    return XOR_L(this)
+  case 0xae:
+    return XOR_HL(this)
+  case 0xaf:
+    return XOR_A(this)
+  case 0xb0:
+    return OR_A_B(this)
+  case 0xb1:
+    return OR_A_C(this)
+  case 0xb2:
+    return OR_A_D(this)
+  case 0xb3:
+    return OR_A_E(this)
+  case 0xb4:
+    return OR_A_H(this)
+  case 0xb5:
+    return OR_A_L(this)
+  case 0xb6:
+    return OR_A_HL(this)
+  case 0xb7:
+    return OR_A_A(this)
+  case 0xb8:
+    return CP_A_B(this)
+  case 0xb9:
+    return CP_A_C(this)
+  case 0xba:
+    return CP_A_D(this)
+  case 0xbb:
+    return CP_A_E(this)
+  case 0xbc:
+    return CP_A_H(this)
+  case 0xbd:
+    return CP_A_L(this)
+  case 0xbe:
+    return CP_HL_memory(this)
+  case 0xbf:
+    return CP_A_A(this)
+  case 0xc0:
+    return RET_NZ(this)
+  case 0xc1:
+    return POP_BC(this)
+  case 0xc2:
+    return JP_NZ_number(this)
+  case 0xc3:
+    return JP(this)
+  case 0xc4:
+    return CALL_NZ_number(this)
+  case 0xc5:
+    return PUSH_BC(this)
+  case 0xc6:
+    return ADD_A_number(this)
+  case 0xc7:
+    return RST_00(this)
+  case 0xc8:
+    return RET_Z(this)
+  case 0xc9:
+    return RET(this)
+  case 0xca:
+    return JP_Z_number(this)
+  case 0xcb:
+    return NOOP(this)
+  case 0xcc:
+    return CALL_Z_number(this)
+  case 0xcd:
+    return CALL(this)
+  case 0xce:
+    return ADC_A_number(this)
+  case 0xcf:
+    return RST_08(this)
+  case 0xd0:
+    return RET_NC(this)
+  case 0xd1:
+    return POP_DE(this)
+  case 0xd2:
+    return JP_NC_number(this)
+  case 0xd3:
+    return NOOP(this)
+  case 0xd4:
+    return CALL_C_number(this)
+  case 0xd5:
+    return PUSH_DE(this)
+  case 0xd6:
+    return SUB_number(this)
+  case 0xd7:
+    return RST_10(this)
+  case 0xd8:
+    return RET_C(this)
+  case 0xd9:
+    return RETI(this)
+  case 0xda:
+    return JP_C_number(this)
+  case 0xdb:
+    return NOOP(this)
+  case 0xdc:
+    return CALL_C_number(this)
+  case 0xdd:
+    return NOOP(this)
+  case 0xde:
+    return SBC_A_number(this)
+  case 0xdf:
+    return RST_18(this)
+  case 0xe0:
+    return LD_n_A(this)
+  case 0xe1:
+    return POP_HL(this)
+  case 0xe2:
+    return LD_ff00_C_A(this)
+  case 0xe3:
+    return NOOP(this)
+  case 0xe4:
+    return NOOP(this)
+  case 0xe5:
+    return PUSH_HL(this)
+  case 0xe6:
+    return AND_A_number(this)
+  case 0xe7:
+    return RST_20(this)
+  case 0xe8:
+    return ADD_SP_number(this)
+  case 0xe9:
+    return JP_HL(this)
+  case 0xea:
+    return LD_nn_A(this)
+  case 0xeb:
+    return NOOP(this)
+  case 0xec:
+    return NOOP(this)
+  case 0xed:
+    return NOOP(this)
+  case 0xee:
+    return XOR_number(this)
+  case 0xef:
+    return RST_28(this)
+  case 0xf0:
+    return LD_A_n(this)
+  case 0xf1:
+    return POP_AF(this)
+  case 0xf2:
+    return LD_A_ff00_C(this)
+  case 0xf3:
+    return DI(this)
+  case 0xf4:
+    return NOOP(this)
+  case 0xf5:
+    return PUSH_AF(this)
+  case 0xf6:
+    return OR_A_number(this)
+  case 0xf7:
+    return RST_30(this)
+  case 0xf8:
+    return LDHL_SP_number(this)
+  case 0xf9:
+    return LD_SP_HL(this)
+  case 0xfa:
+    return LD_A_nn(this)
+  case 0xfb:
+    return EI(this)
+  case 0xfc:
+    return NOOP(this)
+  case 0xfd:
+    return NOOP(this)
+  case 0xfe:
+    return CP_n(this)
+  case 0xff:
+    return RST_38(this)
+  default:
+    return -1
+  }
 }
 

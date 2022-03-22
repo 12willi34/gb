@@ -151,34 +151,61 @@ func RES_0_A(this *cpu) int {
   return 8
 }
 
-func (this *cpu) init_cb_ops() [0x100]func(*cpu) int {
-  var cb_ops [0x100]func(*cpu) int
-  cb_ops[0x10] = RL_B
-  cb_ops[0x11] = RL_C
-  cb_ops[0x12] = RL_D
-  cb_ops[0x13] = RL_E
-  cb_ops[0x14] = RL_H
-  cb_ops[0x15] = RL_L
-  cb_ops[0x17] = RL_A
-  cb_ops[0x30] = SWAP_B
-  cb_ops[0x31] = SWAP_C
-  cb_ops[0x37] = SWAP_A
-  cb_ops[0x32] = SWAP_D
-  cb_ops[0x33] = SWAP_E
-  cb_ops[0x34] = SWAP_H
-  cb_ops[0x35] = SWAP_L
-  cb_ops[0x36] = SWAP_HL
-  cb_ops[0x38] = SRL_B
-  cb_ops[0x39] = SRL_C
-  cb_ops[0x3a] = SRL_D
-  cb_ops[0x3b] = SRL_E
-  cb_ops[0x3c] = SRL_H
-  cb_ops[0x3d] = SRL_L
-  cb_ops[0x3e] = SRL_HL
-  cb_ops[0x3f] = SRL_A
-  cb_ops[0x7c] = BIT_7_H
-  cb_ops[0x8c] = RES_1_H
-  cb_ops[0x87] = RES_0_A
-  return cb_ops
+func (this *cpu) do_cb_op(op uint8) int {
+  switch(op) {
+  case 0x10:
+    return RL_B(this)
+  case 0x11:
+    return RL_C(this)
+  case 0x12:
+    return RL_D(this)
+  case 0x13:
+    return RL_E(this)
+  case 0x14:
+    return RL_H(this)
+  case 0x15:
+    return RL_L(this)
+  case 0x17:
+    return RL_A(this)
+  case 0x30:
+    return SWAP_B(this)
+  case 0x31:
+    return SWAP_C(this)
+  case 0x37:
+    return SWAP_A(this)
+  case 0x32:
+    return SWAP_D(this)
+  case 0x33:
+    return SWAP_E(this)
+  case 0x34:
+    return SWAP_H(this)
+  case 0x35:
+    return SWAP_L(this)
+  case 0x36:
+    return SWAP_HL(this)
+  case 0x38:
+    return SRL_B(this)
+  case 0x39:
+    return SRL_C(this)
+  case 0x3a:
+    return SRL_D(this)
+  case 0x3b:
+    return SRL_E(this)
+  case 0x3c:
+    return SRL_H(this)
+  case 0x3d:
+    return SRL_L(this)
+  case 0x3e:
+    return SRL_HL(this)
+  case 0x3f:
+    return SRL_A(this)
+  case 0x7c:
+    return BIT_7_H(this)
+  case 0x8c:
+    return RES_1_H(this)
+  case 0x87:
+    return RES_0_A(this)
+  default:
+    return -1
+  }
 }
-

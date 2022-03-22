@@ -47,10 +47,10 @@ func NewMemoryUnit(boot []byte, rom []byte) memoryunit {
   mu.addr[0x4b] = 0x00
   mu.addr[0xff] = 0x00
   */
-  for i := 0; i < len(rom); i++ {
+  for i := 0; i < 0x8000 && i < len(rom); i++ {
     mu.addr[i] = rom[i]
   }
-  for i := 0; i < len(boot); i++ {
+  for i := 0; i < 0x100 && i < len(boot); i++ {
     mu.addr[i] = boot[i]
   }
   return mu

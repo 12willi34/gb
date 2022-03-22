@@ -59,7 +59,7 @@ func (this GameBoy) Init() {
 func (this GameBoy) loop() {
   for this.sdl_loop() {
     this.Interrupter.handle()
-    steps := this.Cpu.Step()
+    steps := this.Cpu.Step_debug()
     if(steps == -1) { return }
     this.Gpu.Step(steps)
     this.Timer.Timing(steps)
