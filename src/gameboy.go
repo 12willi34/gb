@@ -2,7 +2,7 @@ package gb
 
 import (
   "fmt"
-  //"time"
+  "time"
   "github.com/veandco/go-sdl2/sdl"
   "image/color"
   //"image"
@@ -10,6 +10,7 @@ import (
 
 const blank_cycles = 69833
 const title = "GameBoy"
+const vblank_duration = int64(1000/60)
 
 type GameBoy struct {
   Mu *memoryunit
@@ -17,7 +18,8 @@ type GameBoy struct {
   Timer *timer
   Interrupter *interrupter
   Gpu *Gpu
-  rom []byte
+  first_rom_part []byte
+  last_vblank int64
 
   //sdl
   w *sdl.Window
@@ -36,7 +38,8 @@ func NewGameBoy(boot []byte, rom []byte) GameBoy {
     Timer: &timer,
     Interrupter: &interrupter,
     Gpu: &gpu,
-    rom: rom,
+    first_rom_part: rom[:0x100],
+    last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
     w: nil,
   }
 }
@@ -71,7 +74,7 @@ func (this GameBoy) boot_loop() {
     steps := this.Cpu.Step()
     if(this.Cpu.pc.value >= 0x100) {
       for i := 0; i < 0x100; i++ {
-        this.Mu.addr[i] = this.rom[i]
+        this.Mu.addr[i] = this.first_rom_part[i]
       }
       return
     }
@@ -91,10 +94,14 @@ func (this GameBoy) sdl_loop() bool {
           surf.Set(x, y, color.Alpha {A: this.Gpu.buffer[y][x]})
         }
       }
+      for time.Now().UnixMilli() - this.last_vblank < vblank_duration {
+        time.Sleep(10*time.Millisecond)
+      }
     } else {
       fmt.Println(err)
     }
     this.w.UpdateSurface()
+    this.last_vblank = time.Now().UnixMilli()
     this.Gpu.vblank = false
   }
   for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
