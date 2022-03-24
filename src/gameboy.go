@@ -23,6 +23,7 @@ type GameBoy struct {
 
   //sdl
   w *sdl.Window
+  UseWindow bool
 }
 
 func NewGameBoy(boot []byte, rom []byte) GameBoy {
@@ -40,7 +41,9 @@ func NewGameBoy(boot []byte, rom []byte) GameBoy {
     Gpu: &gpu,
     first_rom_part: rom[:0x100],
     last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
+
     w: nil,
+    UseWindow: true,
   }
 }
 
@@ -86,6 +89,7 @@ func (this GameBoy) boot_loop() {
 }
 
 func (this GameBoy) sdl_loop() bool {
+  if(!this.UseWindow) { return true }
   if(this.Gpu.vblank) {
     surf, err := this.w.GetSurface()
     if(err == nil) {
