@@ -631,6 +631,7 @@ func JR_nZ(this *cpu) int {
   a := int8(this.fetch())
   if(!this.get_f_zero()) {
     (*this).pc.value = uint16(int32((*this).pc.value) + int32(a))
+    return 12
   }
   return 8
 }
@@ -639,6 +640,7 @@ func JR_Z(this *cpu) int {
   a := int8(this.fetch())
   if(this.get_f_zero()) {
     (*this).pc.value = uint16(int32((*this).pc.value) + int32(a))
+    return 12
   }
   return 8
 }
@@ -647,6 +649,7 @@ func JR_nC(this *cpu) int {
   a := int8(this.fetch())
   if(!this.get_f_carry()) {
     (*this).pc.value = uint16(int32((*this).pc.value) + int32(a))
+    return 12
   }
   return 8
 }
@@ -655,6 +658,7 @@ func JR_C(this *cpu) int {
   a := int8(this.fetch())
   if(this.get_f_carry()) {
     (*this).pc.value = uint16(int32((*this).pc.value) + int32(a))
+    return 12
   }
   return 8
 }

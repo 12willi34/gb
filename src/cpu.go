@@ -61,7 +61,7 @@ func (this *cpu) compare_8(a uint8, b uint8) {
   x := a - b
   this.set_f_zero(x == 0)
   this.set_f_subtr(true)
-  this.set_f_h_carry((b & 0x0f) > (a & 0x0f))
+  this.set_f_h_carry((a & 0x0f) > (b & 0x0f))
   this.set_f_carry(a < b)
 }
 
@@ -69,7 +69,7 @@ func (this *cpu) increment(x uint8) uint8 {
   res := x + 1
   this.set_f_zero(res == 0)
   this.set_f_subtr(false)
-  this.set_f_h_carry((x & 0xf) + (1 & 0xf) > 0xf)
+  this.set_f_h_carry((res & 0xf) == 0)
   return res
 }
 
