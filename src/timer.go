@@ -42,7 +42,7 @@ func (this *timer) update_div(cycles int) {
   (*this).div_internal += uint16(cycles)
   for((*this).div_internal > 0xff) {
     (*this).div_internal -= 0xff
-    (*this).bus.Write_8(div, (*this).bus.Read_8(div) + 1)
+    (*this).bus.addr[div] = (*this).bus.Read_8(div) + 1
   }
 }
 
@@ -52,10 +52,10 @@ func (this *timer) update_tima(cycles int) {
     (*this).tima_internal -= this.tac_freq()
     t := (*this).bus.Read_8(tima)
     if(t == 0xff) {
-      (*this).bus.Write_8(tima, (*this).bus.Read_8(tma))
+      (*this).bus.addr[tima] = (*this).bus.Read_8(tma)
       (*this).timer_interrupt()
     } else {
-      (*this).bus.Write_8(tima, t + 1)
+      (*this).bus.addr[tima] = t + 1
     }
   }
 }

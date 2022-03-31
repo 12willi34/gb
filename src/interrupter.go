@@ -47,7 +47,7 @@ func (this *interrupter) do_interrupt(i int) {
 }
 
 func (this *interrupter) handle() {
-  if((*this).processor.Interrupt) {
+  if(this.processor.Interrupt) {
     inter_f := (*this).mu.Read_8(flag_register)
     if(inter_f > 0) {
       inter_e := (*this).mu.Read_8(enable_register)

@@ -12,8 +12,6 @@ type cpu struct {
   hl Register
   sp Register //stack pointer
   pc Register //program counter
-
-  debug Debugger
 }
 
 func NewCPU(mu memoryunit) cpu {
@@ -27,8 +25,6 @@ func NewCPU(mu memoryunit) cpu {
     hl: Register {value: 0x0000,},
     sp: Register {value: 0x0000,},
     pc: Register {value: 0x0000,},
-    
-    debug: NewDebugger(),
   }
   return res
 }

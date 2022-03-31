@@ -1,9 +1,5 @@
 package gb
 
-import (
-  //"fmt"
-)
-
 func NOOP(this *cpu) int {
   return 4
 }
@@ -730,19 +726,20 @@ func PUSH_BC(this *cpu) int {
 func RET_Z(this *cpu) int {
   if(this.get_f_zero()) {
     this.pc.value = this.popStack()
+    return 20
   }
   return 8
 }
 
 func RET(this *cpu) int {
   (*this).pc.value = this.popStack()
-  return 8
+  return 16
 }
 
 func CALL(this *cpu) int {
   (*this).pushStack((*this).pc.value)
   (*this).pc.value = this.fetch_16()
-  return 12
+  return 24
 }
 
 func EI(this *cpu) int {
@@ -1231,7 +1228,7 @@ func CP_A_L(this *cpu) int {
 func RETI(this *cpu) int {
   (*this).pc.value = this.popStack()
   (*this).Interrupt = true
-  return 8
+  return 16
 }
 
 func CCF(this *cpu) int {
@@ -1269,6 +1266,7 @@ func JP_NZ_number(this *cpu) int {
   val := this.fetch_16()
   if(!this.get_f_zero()) {
     (*this).pc.value = val
+    return 16
   }
   return 12
 }
@@ -1277,6 +1275,7 @@ func JP_Z_number(this *cpu) int {
   val := this.fetch_16()
   if(this.get_f_zero()) {
     (*this).pc.value = val
+    return 16
   }
   return 12
 }
@@ -1285,6 +1284,7 @@ func JP_NC_number(this *cpu) int {
   val := this.fetch_16()
   if(!this.get_f_carry()) {
     (*this).pc.value = val
+    return 16
   }
   return 12
 }
@@ -1293,6 +1293,7 @@ func JP_C_number(this *cpu) int {
   val := this.fetch_16()
   if(this.get_f_carry()) {
     (*this).pc.value = val
+    return 16
   }
   return 12
 }
@@ -1316,6 +1317,7 @@ func CALL_NZ_number(this *cpu) int {
   if(!this.get_f_zero()) {
     (*this).pushStack((*this).pc.value)
     (*this).pc.value = val
+    return 24
   }
   return 12
 }
@@ -1325,6 +1327,7 @@ func CALL_Z_number(this *cpu) int {
   if(this.get_f_zero()) {
     (*this).pushStack((*this).pc.value)
     (*this).pc.value = val
+    return 24
   }
   return 12
 }
@@ -1334,6 +1337,7 @@ func CALL_NC_number(this *cpu) int {
   if(!this.get_f_carry()) {
     (*this).pushStack((*this).pc.value)
     (*this).pc.value = val
+    return 24
   }
   return 12
 }
@@ -1343,6 +1347,7 @@ func CALL_C_number(this *cpu) int {
   if(this.get_f_carry()) {
     (*this).pushStack((*this).pc.value)
     (*this).pc.value = val
+    return 24
   }
   return 12
 }
@@ -1380,6 +1385,7 @@ func DEC_L(this *cpu) int {
 func RET_NZ(this *cpu) int {
   if(!this.get_f_zero()) {
     this.pc.value = this.popStack()
+    return 20
   }
   return 8
 }
@@ -1387,6 +1393,7 @@ func RET_NZ(this *cpu) int {
 func RET_NC(this *cpu) int {
   if(!this.get_f_carry()) {
     this.pc.value = this.popStack()
+    return 20
   }
   return 8
 }
@@ -1394,6 +1401,7 @@ func RET_NC(this *cpu) int {
 func RET_C(this *cpu) int {
   if(this.get_f_carry()) {
     this.pc.value = this.popStack()
+    return 20
   }
   return 8
 }

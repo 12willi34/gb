@@ -1,12 +1,15 @@
 package gb
 
+//import "fmt"
+//import "strconv"
+
 const (
   width = 160
   height = 144
-  hblank_mode = uint8(0)
-  vblank_mode = uint8(1)
-  oam_mode = uint8(2)
-  data_mode = uint8(3)
+  hblank_mode = uint8(0)//uint8(0)
+  vblank_mode = uint8(1)//uint8(1)
+  oam_mode = uint8(2)//uint8(2)
+  data_mode = uint8(3)//uint8(3)
   col_white = 0xff
   col_light_gray = 0xff*(3/4)
   col_dark_gray = 0xff*(1/4)
@@ -49,7 +52,8 @@ func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
     palette1: NewObjPalette1(mu),
     line: NewLine(mu),
   }
-  x.lcdc.set(x.lcdc.get() | (1 << 7)) //enable lcd
+  x.stat.set_mode(oam_mode)
+  //x.lcdc.set(x.lcdc.get() | (1 << 7)) //enable lcd
   return x
 }
 
@@ -214,36 +218,25 @@ func (this *Gpu) renderSprites() {
 }
 
 func (this *Gpu) updateRegisters() {
-  /*
-  if(!(*this).lcdc.get_lcd_enabled()) {
-    this.clearScreen()
-    (*this).line.set(0)
-    (*this).stat.set_mode(hblank_mode)
-    return
-  }
-  */
-
-  interrupt := false
-
   switch((*this).stat.get_mode()) {
     case hblank_mode: //= 0
       if((*this).clock >= 204) {
         (*this).clock %= 204
-        line := (*this).line.inc()
-        if(line >= height) {
-          interrupt = (*this).stat.set_mode(vblank_mode)
+        this.scanline(this.line.get())
+        line := this.line.inc()
+        if(line == 144) {
+          (*this).stat.set_mode(vblank_mode)
+          this.ir.Request(0)
         } else {
-          this.scanline(line)
-          interrupt = (*this).stat.set_mode(oam_mode)
+          (*this).stat.set_mode(oam_mode)
         }
       }
     case vblank_mode: //= 1
       if((*this).clock >= 456) {
         (*this).clock %= 456
         line := (*this).line.inc()
-        if(line > 153) {
-          (*this).ir.Request(0)
-          interrupt = (*this).stat.set_mode(oam_mode)
+        if(line == 154) {
+          (*this).stat.set_mode(oam_mode)
           (*this).line.set(0)
           (*this).vblank = true
         }
@@ -256,23 +249,26 @@ func (this *Gpu) updateRegisters() {
     case data_mode: //= 3
       if((*this).clock >= 172) {
         (*this).clock %= 172
-        interrupt = (*this).stat.set_mode(hblank_mode)
+        (*this).stat.set_mode(hblank_mode)
+        if(0 < (this.stat.get() & (1 << 3))) {
+          this.ir.Request(1)
+        }
+        coincidence := bool((*this).line.get() == (*this).line.get_c())
+        if(coincidence && ((this.stat.get() & (1 << 6)) > 0)) {
+          this.ir.Request(1)
+        }
+        if(coincidence) {
+          this.stat.set(this.stat.get() | uint8(1 << 2))
+        } else {
+          this.stat.set(this.stat.get() & ^uint8(1 << 2))
+        }
       }
-  }
-
-  if(interrupt) { (*this).ir.Request(1) }
-
-  if((*this).line.get() == (*this).line.get_c()) {
-    (*this).stat.set((*this).stat.get() | (1 << 2))
-    if(((*this).stat.get() & (1 << 6)) > 0) {
-      (*this).ir.Request(1)
-    }
-  } else {
-    (*this).stat.set((*this).stat.get() & uint8(^(uint8(1) << 2)))
   }
 }
 
 func (this *Gpu) Step(cycles int) {
-  (*this).clock += cycles
+  c := cycles/4
+  this.clock += c
+  //log(strconv.FormatInt(int64(this.clock), 10))
   this.updateRegisters()
 }

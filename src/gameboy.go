@@ -23,7 +23,7 @@ type GameBoy struct {
 
   //sdl
   w *sdl.Window
-  UseWindow bool
+  Debug_mode bool
 }
 
 func NewGameBoy(boot []byte, rom []byte) GameBoy {
@@ -43,7 +43,6 @@ func NewGameBoy(boot []byte, rom []byte) GameBoy {
     last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
 
     w: nil,
-    UseWindow: true,
   }
 }
 
@@ -74,6 +73,7 @@ func (this GameBoy) loop() {
 
 func (this GameBoy) boot_loop() {
   for this.sdl_loop() {
+    this.Interrupter.handle()
     steps := this.Cpu.Step()
     if(this.Cpu.pc.value >= 0x100) {
       for i := 0; i < 0x100; i++ {
@@ -84,12 +84,11 @@ func (this GameBoy) boot_loop() {
     if(steps == -1) { return }
     this.Gpu.Step(steps)
     this.Timer.Timing(steps)
-    this.Interrupter.handle()
   }
 }
 
 func (this GameBoy) sdl_loop() bool {
-  if(!this.UseWindow) { return true }
+  if(this.Debug_mode) { return true }
   if(this.Gpu.vblank) {
     surf, err := this.w.GetSurface()
     if(err == nil) {

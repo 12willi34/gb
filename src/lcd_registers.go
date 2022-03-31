@@ -53,13 +53,9 @@ func (this Stat) get_mode() uint8 {
   return this.get() & 0x03
 }
 
-func (this Stat) set_mode(val uint8) bool {
+func (this Stat) set_mode(val uint8) {
   status := this.get()
   this.set((status & ^uint8(3))| val)
-  if(val != 3) {
-    return 0 < (status & (1 << (3 + val)))
-  }
-  return false
 }
 
 func (this Stat) get_vblank() bool {
@@ -68,10 +64,10 @@ func (this Stat) get_vblank() bool {
 
 /* Line */
 
-type Line struct { mu *memoryunit }
+type Line struct { mu memoryunit }
 
 func NewLine(mu memoryunit) Line {
-  return Line { mu: &mu, }
+  return Line { mu: mu, }
 }
 
 func (this Line) inc() uint8 {
