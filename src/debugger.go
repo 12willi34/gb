@@ -4,9 +4,11 @@ import (
   "os"
   "fmt"
   "bufio"
+  "strconv"
 )
 
 var reader = bufio.NewReader(os.Stdin)
+var global_s int = 0
 
 type Debugger struct {
   Mu *memoryunit
@@ -76,6 +78,10 @@ func (this Debugger) debug_loop() {
 }
 
 func (this Debugger) showStatus() {
+  if global_s > 0 {
+    global_s--
+    return
+  }
   fmt.Println("i:", this.global_i)
   fmt.Printf("op: %02x\n", this.Mu.addr[this.Cpu.pc.value])
   fmt.Printf("next op: %02x\n", this.Mu.addr[this.Cpu.pc.value + 1])
@@ -88,5 +94,9 @@ func (this Debugger) showStatus() {
   fmt.Printf("sp: %04x\n", this.Cpu.sp.value)
   fmt.Printf("pc: %04x\n", this.Cpu.pc.value)
   
-  reader.ReadString('\n')
+  x, _ := reader.ReadString('\n')
+  num, err := strconv.ParseInt(x[:len(x) - 1], 10, 64)
+  if err == nil {
+    global_s = int(num)
+  }
 }

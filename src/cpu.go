@@ -36,28 +36,32 @@ func (this *cpu) fetch() uint8 {
 }
 
 func (this *cpu) fetch_16() uint16 {
-  a := uint16(this.fetch())
-  b := uint16(this.fetch())
-  return ((b << 8) | a)
+  lo := uint16(this.fetch())
+  hi := uint16(this.fetch())
+  return uint16((hi << 8) | lo)
 }
 
 func (this *cpu) popStack() uint16 {
-  x := (*this.mu).Read_16(this.sp.value)
-  this.sp.value += 2
+  lo := this.mu.Read_8(this.sp.value)
+  this.sp.value++
+  hi := this.mu.Read_8(this.sp.value)
+  this.sp.value++
+  x := uint16((uint16(hi) << 8) | uint16(lo))
   return x
 }
 
 func (this *cpu) pushStack(a uint16) {
-  (*this).mu.Write_8((*this).sp.value - 1, uint8(uint16(a & 0xFF00) >> 8))
-  (*this).mu.Write_8((*this).sp.value - 2, uint8(a & 0xFF))
-  (*this).sp.value -= 2
+  this.sp.value--
+  this.mu.Write_8(this.sp.value, uint8((a & 0xff00) >> 8))
+  this.sp.value--
+  this.mu.Write_8(this.sp.value, uint8(a & 0xff))
 }
 
 func (this *cpu) compare_8(a uint8, b uint8) {
-  x := a - b
+  x := uint8(a - b)
   this.set_f_zero(x == 0)
   this.set_f_subtr(true)
-  this.set_f_h_carry((a & 0x0f) > (b & 0x0f))
+  this.set_f_h_carry((a & 0xf) - (b & 0xf) < 0)
   this.set_f_carry(a < b)
 }
 
@@ -169,8 +173,12 @@ func (this *cpu) subtract_carry(a uint8, b uint8) uint8 {
 func (this *cpu) rotate_left(a uint8) uint8 {
   old_cy := uint8(0)
   if(this.get_f_carry()) { old_cy = uint8(1) }
-  new_cy := a >> 7
-  res := uint8(((a << 1) & 0xff) | old_cy)
+  new_cy := uint8(0)
+  if((a & (1 << 7)) > 0) {
+    new_cy = 1
+  }
+  res := uint8(a << 1)
+  res |= old_cy
   this.set_f_zero(res == 0)
   this.set_f_subtr(false)
   this.set_f_h_carry(false)

@@ -737,8 +737,9 @@ func RET(this *cpu) int {
 }
 
 func CALL(this *cpu) int {
-  (*this).pushStack((*this).pc.value)
-  (*this).pc.value = this.fetch_16()
+  x := this.fetch_16()
+  this.pushStack(this.pc.value)
+  this.pc.value = x
   return 24
 }
 
