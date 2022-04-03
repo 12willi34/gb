@@ -47,6 +47,9 @@ func (this Debugger) Init() {
 
 func (this Debugger) debug_boot_loop() {
   for true {
+    this.global_i++
+    this.showStatus()
+
     this.Interrupter.handle()
     steps := this.Cpu.Step()
     if(this.Cpu.pc.value >= 0x100) {
@@ -58,35 +61,30 @@ func (this Debugger) debug_boot_loop() {
     if(steps == -1) { return }
     this.Gpu.Step(steps)
     this.Timer.Timing(steps)
-
-    this.global_i++
-    this.showStatus()
   }
 }
 
 func (this Debugger) debug_loop() {
   for true {
+    this.global_i++
+    this.showStatus()
+
     this.Interrupter.handle()
     steps := this.Cpu.Step()
     if(steps == -1) { return }
     this.Gpu.Step(steps)
     this.Timer.Timing(steps)
-
-    this.global_i++
-    this.showStatus()
   }
 }
 
 func (this Debugger) showStatus() {
-  if global_s > 0 {
-    global_s--
-    return
-  }
-  fmt.Println("i:", this.global_i)
   fmt.Printf("op: %02x\n", this.Mu.addr[this.Cpu.pc.value])
   fmt.Printf("next op: %02x\n", this.Mu.addr[this.Cpu.pc.value + 1])
+  fmt.Printf("gpu clock: %d\n", this.Gpu.PubClock)
+  fmt.Printf("line: %d\n", this.Mu.addr[0xff44])
+  fmt.Println("i:", this.global_i)
 
-  fmt.Println("\nregisters")
+  fmt.Println("\nregisters before")
   fmt.Printf("af: %04x\n", this.Cpu.af.value)
   fmt.Printf("bc: %04x\n", this.Cpu.bc.value)
   fmt.Printf("de: %04x\n", this.Cpu.de.value)
@@ -94,6 +92,11 @@ func (this Debugger) showStatus() {
   fmt.Printf("sp: %04x\n", this.Cpu.sp.value)
   fmt.Printf("pc: %04x\n", this.Cpu.pc.value)
   
+  if global_s > 0 {
+    global_s--
+    return
+  }
+
   x, _ := reader.ReadString('\n')
   num, err := strconv.ParseInt(x[:len(x) - 1], 10, 64)
   if err == nil {

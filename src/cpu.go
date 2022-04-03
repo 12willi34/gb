@@ -4,7 +4,11 @@ import "fmt"
 
 type cpu struct {
   mu *memoryunit
+
+  enableInterrupt bool
+  disableInterrupt bool
   Interrupt bool
+
   Halt bool
   af Register
   bc Register
@@ -17,7 +21,11 @@ type cpu struct {
 func NewCPU(mu memoryunit) cpu {
   res := cpu {
     mu: &mu,
+
     Interrupt: false,
+    enableInterrupt: false,
+    disableInterrupt: false,
+
     Halt: false,
     af: Register {value: 0x0000,},
     bc: Register {value: 0x0000,},
@@ -61,7 +69,7 @@ func (this *cpu) compare_8(a uint8, b uint8) {
   x := uint8(a - b)
   this.set_f_zero(x == 0)
   this.set_f_subtr(true)
-  this.set_f_h_carry((a & 0xf) - (b & 0xf) < 0)
+  this.set_f_h_carry((int(a & 0xf) - int(b & 0xf)) < 0)
   this.set_f_carry(a < b)
 }
 
@@ -231,6 +239,14 @@ func (this *cpu) srl(a uint8) uint8 {
 }
 
 func (this *cpu) Step() int {
+  if(this.enableInterrupt) {
+    this.Interrupt = true
+    this.enableInterrupt = false
+  }
+  if(this.disableInterrupt) {
+    this.Interrupt = false
+    this.disableInterrupt = false
+  }
   if((*this).Halt) { return 4 }
   var cycles = -1
   op := this.fetch()

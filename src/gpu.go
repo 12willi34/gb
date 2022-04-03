@@ -20,6 +20,7 @@ type Gpu struct {
   mu *memoryunit
   ir interrupter
   clock int
+  PubClock int
   buffer [height][width]uint8
   vblank bool
 
@@ -39,6 +40,7 @@ func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
     mu: &mu,
     ir: interrupter,
     clock: 0,
+    PubClock: 0,
     buffer: [height][width]uint8{},
     vblank: false,
 
@@ -217,7 +219,12 @@ func (this *Gpu) renderSprites() {
   }
 }
 
-func (this *Gpu) updateRegisters() {
+func (this *Gpu) Step(cycles int) {
+  this.clock += cycles/4
+
+  //temp
+  this.PubClock = this.clock
+
   switch((*this).stat.get_mode()) {
     case hblank_mode: //= 0
       if((*this).clock >= 204) {
@@ -264,11 +271,4 @@ func (this *Gpu) updateRegisters() {
         }
       }
   }
-}
-
-func (this *Gpu) Step(cycles int) {
-  c := cycles/4
-  this.clock += c
-  //log(strconv.FormatInt(int64(this.clock), 10))
-  this.updateRegisters()
 }

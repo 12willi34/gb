@@ -295,7 +295,7 @@ func LD_n_A(this *cpu) int {
 }
 
 func LD_A_n(this *cpu) int {
-  a := (*this.mu).Read_8(0xff00 + uint16(this.fetch()))
+  a := this.mu.Read_8(0xff00 + uint16(this.fetch()))
   this.af.w_high(a)
   return 12
 }
@@ -744,12 +744,14 @@ func CALL(this *cpu) int {
 }
 
 func EI(this *cpu) int {
-  (*this).Interrupt = true
+  //(*this).Interrupt = true
+  this.enableInterrupt = true
   return 4
 }
 
 func DI(this *cpu) int {
-  (*this).Interrupt = false
+  this.disableInterrupt = true
+  //(*this).Interrupt = false
   return 4
 }
 
