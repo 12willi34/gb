@@ -52,15 +52,15 @@ func (this Debugger) debug_boot_loop() {
 
     this.Interrupter.handle()
     steps := this.Cpu.Step()
+    if(steps == -1) { return }
+    this.Gpu.Step(steps)
+    this.Timer.Timing(steps)
     if(this.Cpu.pc.value >= 0x100) {
       for i := 0; i < 0x100; i++ {
         this.Mu.addr[i] = this.first_rom_part[i]
       }
       return
     }
-    if(steps == -1) { return }
-    this.Gpu.Step(steps)
-    this.Timer.Timing(steps)
   }
 }
 
@@ -100,6 +100,7 @@ func (this Debugger) showStatus(boot bool) {
   if boot {
     return
   }
+
   x, _ := reader.ReadString('\n')
   num, err := strconv.ParseInt(x[:len(x) - 1], 10, 64)
   if err == nil {

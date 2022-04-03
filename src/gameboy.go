@@ -75,15 +75,15 @@ func (this GameBoy) boot_loop() {
   for this.sdl_loop() {
     this.Interrupter.handle()
     steps := this.Cpu.Step()
+    if(steps == -1) { return }
+    this.Gpu.Step(steps)
+    this.Timer.Timing(steps)
     if(this.Cpu.pc.value >= 0x100) {
       for i := 0; i < 0x100; i++ {
         this.Mu.addr[i] = this.first_rom_part[i]
       }
       return
     }
-    if(steps == -1) { return }
-    this.Gpu.Step(steps)
-    this.Timer.Timing(steps)
   }
 }
 

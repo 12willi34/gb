@@ -715,7 +715,7 @@ func OR_A_number(this *cpu) int {
 
 func JP(this *cpu) int {
   this.pc.value = this.fetch_16()
-  return 12
+  return 16
 }
 
 func PUSH_BC(this *cpu) int {
@@ -744,14 +744,12 @@ func CALL(this *cpu) int {
 }
 
 func EI(this *cpu) int {
-  //(*this).Interrupt = true
   this.enableInterrupt = true
   return 4
 }
 
 func DI(this *cpu) int {
   this.disableInterrupt = true
-  //(*this).Interrupt = false
   return 4
 }
 
