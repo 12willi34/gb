@@ -20,7 +20,7 @@ type Debugger struct {
   global_i int
 }
 
-func NewDebugger(boot []byte, rom []byte) Debugger {
+func NewDebugger(boot [0x100]byte, rom []byte) Debugger {
   mu := NewMemoryUnit(boot, rom)
   cpu := NewCPU(mu)
   mu.Processor = cpu
@@ -91,7 +91,7 @@ func (this Debugger) showStatus() {
   fmt.Printf("hl: %04x\n", this.Cpu.hl.value)
   fmt.Printf("sp: %04x\n", this.Cpu.sp.value)
   fmt.Printf("pc: %04x\n", this.Cpu.pc.value)
-  
+
   if global_s > 0 {
     global_s--
     return

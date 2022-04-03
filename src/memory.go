@@ -5,7 +5,7 @@ type memoryunit struct {
   Processor cpu
 }
 
-func NewMemoryUnit(boot []byte, rom []byte) memoryunit {
+func NewMemoryUnit(boot [0x100]byte, rom []byte) memoryunit {
 	mu := memoryunit {
 		addr: make([]uint8, 0x10000),
 	}

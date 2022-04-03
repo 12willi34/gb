@@ -26,7 +26,7 @@ type GameBoy struct {
   Debug_mode bool
 }
 
-func NewGameBoy(boot []byte, rom []byte) GameBoy {
+func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
   mu := NewMemoryUnit(boot, rom)
   cpu := NewCPU(mu)
   mu.Processor = cpu
