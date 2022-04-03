@@ -620,7 +620,7 @@ func LD_C_H(this *cpu) int {
 func JR_n(this *cpu) int {
   a := int8(this.fetch())
   (*this).pc.value = uint16(int32((*this).pc.value) + int32(a))
-  return 8
+  return 12
 }
 
 func JR_nZ(this *cpu) int {
