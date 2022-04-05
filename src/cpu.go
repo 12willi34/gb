@@ -21,11 +21,7 @@ type cpu struct {
 func NewCPU(mu *memoryunit) cpu {
   res := cpu {
     mu: mu,
-
     Interrupt: false,
-    enableInterrupt: false,
-    disableInterrupt: false,
-
     Halt: false,
     af: Register {value: 0x0000,},
     bc: Register {value: 0x0000,},
@@ -239,14 +235,6 @@ func (this *cpu) srl(a uint8) uint8 {
 }
 
 func (this *cpu) Step() int {
-  if(this.enableInterrupt) {
-    this.Interrupt = true
-    this.enableInterrupt = false
-  }
-  if(this.disableInterrupt) {
-    this.Interrupt = false
-    this.disableInterrupt = false
-  }
   if((*this).Halt) { return 4 }
   var cycles = -1
   op := this.fetch()

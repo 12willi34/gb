@@ -744,12 +744,12 @@ func CALL(this *cpu) int {
 }
 
 func EI(this *cpu) int {
-  this.enableInterrupt = true
+  this.Interrupt = true
   return 4
 }
 
 func DI(this *cpu) int {
-  this.disableInterrupt = true
+  this.Interrupt = false
   return 4
 }
 
