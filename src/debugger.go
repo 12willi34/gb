@@ -81,6 +81,7 @@ func (this Debugger) showStatus(boot bool) {
   fmt.Printf("op: %02x\n", this.Mu.addr[this.Cpu.pc.value])
   fmt.Printf("next op: %02x\n", this.Mu.addr[this.Cpu.pc.value + 1])
   fmt.Printf("gpu clock: %d\n", this.Gpu.PubClock)
+  fmt.Printf("gpu mode: %d\n", this.Gpu.PubMode)
   fmt.Printf("line: %d\n", this.Mu.addr[0xff44])
   fmt.Println("i:", this.global_i)
 
