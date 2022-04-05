@@ -18,11 +18,12 @@ const (
 
 type Gpu struct {
   mu *memoryunit
-  ir interrupter
+  ir *interrupter
   clock int
 
   PubClock int
   PubMode int
+  mode uint8
 
   buffer [height][width]uint8
   vblank bool
@@ -38,14 +39,15 @@ type Gpu struct {
   palette1 ObjPalette1
 }
 
-func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
+func NewGpu(mu *memoryunit, interrupter *interrupter) Gpu {
   x := Gpu {
-    mu: &mu,
+    mu: mu,
     ir: interrupter,
     clock: 0,
 
     PubClock: 0,
     PubMode: int(oam_mode),
+    mode: oam_mode,
 
     buffer: [height][width]uint8{},
     vblank: false,
@@ -61,7 +63,6 @@ func NewGpu(mu memoryunit, interrupter interrupter) Gpu {
     line: NewLine(mu),
   }
   x.stat.set_mode(oam_mode)
-  //x.lcdc.set(x.lcdc.get() | (1 << 7)) //enable lcd
   return x
 }
 
@@ -225,19 +226,24 @@ func (this *Gpu) renderSprites() {
   }
 }
 
+func (this *Gpu) setMode(mode uint8) {
+  this.mode = mode
+  this.stat.set_mode(mode)
+}
+
 func (this *Gpu) Step(cycles int) {
   this.clock += cycles/4
-  switch((*this).stat.get_mode()) {
+  switch(this.mode) {
     case hblank_mode: //= 0
       if((*this).clock >= 204) {
         (*this).clock %= 204
         this.scanline(this.line.get())
         line := this.line.inc()
         if(line == 144) {
-          (*this).stat.set_mode(vblank_mode)
+          (*this).setMode(vblank_mode)
           this.ir.Request(0)
         } else {
-          (*this).stat.set_mode(oam_mode)
+          this.setMode(oam_mode)
         }
       }
     case vblank_mode: //= 1
@@ -245,7 +251,7 @@ func (this *Gpu) Step(cycles int) {
         (*this).clock %= 456
         line := (*this).line.inc()
         if(line == 154) {
-          (*this).stat.set_mode(oam_mode)
+          this.setMode(oam_mode)
           (*this).line.set(0)
           (*this).vblank = true
         }
@@ -253,12 +259,12 @@ func (this *Gpu) Step(cycles int) {
     case oam_mode: //= 2
       if((*this).clock >= 80) {
         (*this).clock %= 80
-        (*this).stat.set_mode(data_mode)
+        this.setMode(data_mode)
       }
     case data_mode: //= 3
       if((*this).clock >= 172) {
         (*this).clock %= 172
-        (*this).stat.set_mode(hblank_mode)
+        this.setMode(hblank_mode)
         if(0 < (this.stat.get() & (1 << 3))) {
           this.ir.Request(1)
         }
@@ -276,5 +282,5 @@ func (this *Gpu) Step(cycles int) {
 
   //temp
   this.PubClock = this.clock
-  this.PubMode = int(this.stat.get_mode())
+  this.PubMode = int(this.mode)
 }

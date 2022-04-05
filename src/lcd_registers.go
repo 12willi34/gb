@@ -15,9 +15,9 @@ const obp1 = 0xff49
 
 /* lcdc */
 
-type Lcdc struct { mu memoryunit }
+type Lcdc struct { mu *memoryunit }
 
-func NewLcdc(mu memoryunit) Lcdc {
+func NewLcdc(mu *memoryunit) Lcdc {
   return Lcdc { mu: mu, }
 }
 
@@ -35,9 +35,9 @@ func (this Lcdc) get_lcd_enabled() bool {
 
 /* Stat */
 
-type Stat struct { mu memoryunit }
+type Stat struct { mu *memoryunit }
 
-func NewStat(mu memoryunit) Stat {
+func NewStat(mu *memoryunit) Stat {
   return Stat { mu: mu, }
 }
 
@@ -55,7 +55,7 @@ func (this Stat) get_mode() uint8 {
 
 func (this Stat) set_mode(val uint8) {
   status := this.get()
-  this.set((status & ^uint8(3))| val)
+  this.set((status & ^uint8(3)) | val)
 }
 
 func (this Stat) get_vblank() bool {
@@ -64,9 +64,9 @@ func (this Stat) get_vblank() bool {
 
 /* Line */
 
-type Line struct { mu memoryunit }
+type Line struct { mu *memoryunit }
 
-func NewLine(mu memoryunit) Line {
+func NewLine(mu *memoryunit) Line {
   return Line { mu: mu, }
 }
 
@@ -93,9 +93,9 @@ func (this Line) set_c(val uint8) {
 
 /* Scroll */
 
-type Scroll struct { mu memoryunit }
+type Scroll struct { mu *memoryunit }
 
-func NewScroll(mu memoryunit) Scroll {
+func NewScroll(mu *memoryunit) Scroll {
   return Scroll { mu: mu, }
 }
 
@@ -117,9 +117,9 @@ func (this Scroll) set_y(val uint8) {
 
 /* Window */
 
-type Window struct { mu memoryunit }
+type Window struct { mu *memoryunit }
 
-func NewWindow(mu memoryunit) Window {
+func NewWindow(mu *memoryunit) Window {
   return Window { mu: mu, }
 }
 
@@ -141,9 +141,9 @@ func (this Window) set_y(val uint8) {
 
 /* Palette */
 
-type Palette struct { mu memoryunit }
+type Palette struct { mu *memoryunit }
 
-func NewPalette(mu memoryunit) Palette {
+func NewPalette(mu *memoryunit) Palette {
   return Palette { mu: mu, }
 }
 
@@ -157,9 +157,9 @@ func (this Palette) set(val uint8) {
 
 /* ObjPalette0 */
 
-type ObjPalette0 struct { mu memoryunit }
+type ObjPalette0 struct { mu *memoryunit }
 
-func NewObjPalette0(mu memoryunit) ObjPalette0 {
+func NewObjPalette0(mu *memoryunit) ObjPalette0 {
   return ObjPalette0 { mu: mu, }
 }
 
@@ -173,9 +173,9 @@ func (this ObjPalette0) set(val uint8) {
 
 /* ObjPalette1 */
 
-type ObjPalette1 struct { mu memoryunit }
+type ObjPalette1 struct { mu *memoryunit }
 
-func NewObjPalette1(mu memoryunit) ObjPalette1 {
+func NewObjPalette1(mu *memoryunit) ObjPalette1 {
   return ObjPalette1 { mu: mu, }
 }
 

@@ -10,11 +10,11 @@ const joypad_flag = 4
 var flag_addr_table = []uint16{0x40, 0x48, 0x50, 0x58, 0x60}
 
 type interrupter struct {
-  mu memoryunit
+  mu *memoryunit
   processor cpu
 }
 
-func NewInterrupter(mu memoryunit, processor cpu) interrupter {
+func NewInterrupter(mu *memoryunit, processor cpu) interrupter {
   return interrupter {
     mu: mu,
     processor: processor,

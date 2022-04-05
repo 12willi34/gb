@@ -18,9 +18,9 @@ type cpu struct {
   pc Register //program counter
 }
 
-func NewCPU(mu memoryunit) cpu {
+func NewCPU(mu *memoryunit) cpu {
   res := cpu {
-    mu: &mu,
+    mu: mu,
 
     Interrupt: false,
     enableInterrupt: false,

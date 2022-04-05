@@ -28,16 +28,18 @@ type GameBoy struct {
 
 func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
   mu := NewMemoryUnit(boot, rom)
-  cpu := NewCPU(mu)
+  mu_pointer := &mu
+  cpu := NewCPU(mu_pointer)
   mu.Processor = cpu
-  interrupter := NewInterrupter(mu, cpu)
-  timer := NewTimer(mu, interrupter)
-  gpu := NewGpu(mu, interrupter)
+  interrupter := NewInterrupter(mu_pointer, cpu)
+  interrupter_pointer := &interrupter
+  timer := NewTimer(mu_pointer, interrupter_pointer)
+  gpu := NewGpu(mu_pointer, interrupter_pointer)
   return GameBoy {
-    Mu: &mu,
+    Mu: mu_pointer,
     Cpu: &cpu,
     Timer: &timer,
-    Interrupter: &interrupter,
+    Interrupter: interrupter_pointer,
     Gpu: &gpu,
     first_rom_part: rom[:0x100],
     last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),

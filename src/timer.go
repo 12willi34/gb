@@ -11,13 +11,13 @@ const tac = 0xff07
 var frequencies = []int{1024, 16, 64, 256}
 
 type timer struct {
-  bus memoryunit
+  bus *memoryunit
   div_internal uint16
   tima_internal int
-  inter interrupter
+  inter *interrupter
 }
 
-func NewTimer(mu memoryunit, inter interrupter) timer {
+func NewTimer(mu *memoryunit, inter *interrupter) timer {
   return timer {
     bus: mu,
     div_internal: 0,
