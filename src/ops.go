@@ -1021,42 +1021,42 @@ func RLA(this *cpu) int {
 
 func RST_38(this *cpu) int {
   this.restart(0x38)
-  return 32
+  return 16
 }
 
 func RST_30(this *cpu) int {
   this.restart(0x30)
-  return 32
+  return 16
 }
 
 func RST_28(this *cpu) int {
   this.restart(0x28)
-  return 32
+  return 16
 }
 
 func RST_20(this *cpu) int {
   this.restart(0x20)
-  return 32
+  return 16
 }
 
 func RST_18(this *cpu) int {
   this.restart(0x18)
-  return 32
+  return 16
 }
 
 func RST_10(this *cpu) int {
   this.restart(0x10)
-  return 32
+  return 16
 }
 
 func RST_08(this *cpu) int {
   this.restart(0x08)
-  return 32
+  return 16
 }
 
 func RST_00(this *cpu) int {
   this.restart(0x00)
-  return 32
+  return 16
 }
 
 func XOR_A(this *cpu) int {

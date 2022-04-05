@@ -11,51 +11,35 @@ var flag_addr_table = []uint16{0x40, 0x48, 0x50, 0x58, 0x60}
 
 type interrupter struct {
   mu *memoryunit
-  processor cpu
+  processor *cpu
 }
 
-func NewInterrupter(mu *memoryunit, processor cpu) interrupter {
+func NewInterrupter(mu *memoryunit, processor *cpu) interrupter {
   return interrupter {
     mu: mu,
     processor: processor,
   }
 }
 
-func (this *interrupter) set_flag(i int) {
-  new_flag_val := (*this).mu.Read_8(flag_register) | (1 << i)
-  (*this).mu.Write_8(flag_register, new_flag_val)
-}
-
 func (this *interrupter) Request(flag int) {
-  this.set_flag(flag)
-}
-
-func (this *interrupter) check_interrupt(inter_f uint8, inter_e uint8, i int) bool {
-  b := uint8(1 << i)
-  return (((b & inter_f) > 0) && ((b & inter_e) > 0))
-}
-
-func (this *interrupter) do_interrupt(i int) {
-  (*this).processor.Interrupt = false
-  (*this).processor.Halt = false
-
-  updated_flags := (*this).mu.Read_8(flag_register) & ^uint8(1 << i)
-  (*this).mu.Write_8(flag_register, updated_flags)
-
-  (*this).processor.pushStack((*this).processor.pc.value)
-  (*this).processor.pc.value = flag_addr_table[i]
+  x := this.mu.Read_8(flag_register) | uint8(1 << flag)
+  this.mu.Write_8(flag_register, x)
 }
 
 func (this *interrupter) handle() {
   if(this.processor.Interrupt) {
-    inter_f := (*this).mu.Read_8(flag_register)
-    if(inter_f > 0) {
-      inter_e := (*this).mu.Read_8(enable_register)
-      for i := 0; i < 5; i++ {
-        if(this.check_interrupt(inter_f, inter_e, i)) {
-          this.do_interrupt(i)
-          return
-        }
+    flag := this.mu.Read_8(flag_register)
+    enable := this.mu.Read_8(enable_register)
+    x := flag & enable
+    if x == 0 { return }
+    this.processor.Halt = false
+    this.processor.Interrupt = false
+    for i := 0; i < 5; i++ {
+      if 0 < (x & (1 << i)) {
+        this.mu.Write_8(flag_register, flag & ^uint8(1 << i))
+        this.processor.pushStack(this.processor.pc.value)
+        this.processor.pc.value = flag_addr_table[i]
+        return
       }
     }
   }

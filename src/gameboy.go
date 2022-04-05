@@ -30,14 +30,15 @@ func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
   mu := NewMemoryUnit(boot, rom)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
-  mu.Processor = cpu
-  interrupter := NewInterrupter(mu_pointer, cpu)
+  cpu_pointer := &cpu
+  mu.Processor = cpu_pointer
+  interrupter := NewInterrupter(mu_pointer, cpu_pointer)
   interrupter_pointer := &interrupter
   timer := NewTimer(mu_pointer, interrupter_pointer)
   gpu := NewGpu(mu_pointer, interrupter_pointer)
   return GameBoy {
     Mu: mu_pointer,
-    Cpu: &cpu,
+    Cpu: cpu_pointer,
     Timer: &timer,
     Interrupter: interrupter_pointer,
     Gpu: &gpu,

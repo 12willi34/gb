@@ -2,7 +2,7 @@ package gb
 
 type memoryunit struct {
 	addr []uint8
-  Processor cpu
+  Processor *cpu
 }
 
 func NewMemoryUnit(boot [0x100]byte, rom []byte) memoryunit {
@@ -102,6 +102,9 @@ func (this memoryunit) Write_16(i uint16, data uint16) {
 
 func (this memoryunit) read_io(i uint16) uint8 {
   switch i {
+  case 0xff00:
+    //input
+    return 0xff
   case 0xff02:
     return 0xff
   case 0xff10:
