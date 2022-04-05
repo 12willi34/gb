@@ -234,19 +234,36 @@ func (this *cpu) srl(a uint8) uint8 {
   return res
 }
 
+//SLA
+func (this *cpu) shift_left_carry(val uint8) uint8 {
+  new_cy := bool(0 < (val & (1 << 7)))
+  res := uint8(val << 1)
+  this.set_f_zero(res == 0)
+  this.set_f_subtr(false)
+  this.set_f_h_carry(false)
+  this.set_f_carry(new_cy == true)
+  return res
+}
+
 func (this *cpu) Step() int {
   if((*this).Halt) { return 4 }
   var cycles = -1
+  var cb_op uint8
   op := this.fetch()
   if(op == 0xcb) {
-    cb_op := this.fetch()
+    cb_op = this.fetch()
     cycles = this.do_cb_op(cb_op)
   } else {
     cycles = this.do_op(op)
   }
   if(cycles == -1) {
-    fmt.Printf("opcode not implemented: %x\n", op)
-    return -1
+    if(op == 0xcb) {
+      fmt.Printf("opcode not implemented: cb %x\n", cb_op)
+      return -1
+    } else {
+      fmt.Printf("opcode not implemented: %x\n", op)
+      return -1
+    }
   }
   return cycles
 }

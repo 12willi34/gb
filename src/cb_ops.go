@@ -55,6 +55,11 @@ func BIT_7_H(this *cpu) int {
   return 8
 }
 
+func BIT_7_A(this *cpu) int {
+  this.bit(7, this.af.r_high())
+  return 8
+}
+
 func RL_A(this *cpu) int {
   a := this.rotate_left((*this).af.r_high())
   (*this).af.w_high(a)
@@ -145,9 +150,20 @@ func RES_1_H(this *cpu) int {
   return 8
 }
 
+func RES_0_HL(this *cpu) int {
+  val := this.mu.Read_8(this.hl.value) & ^uint8(1 << 0)
+  this.mu.Write_8(this.hl.value, val)
+  return 16
+}
+
 func RES_0_A(this *cpu) int {
   val := (*this).af.r_high() & ^uint8(1 << 0)
   (*this).af.w_high(val)
+  return 8
+}
+
+func SLA_A(this *cpu) int {
+  this.af.w_high(this.shift_left_carry(this.af.r_high()))
   return 8
 }
 
@@ -167,6 +183,8 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RL_L(this)
   case 0x17:
     return RL_A(this)
+  case 0x27:
+    return SLA_A(this)
   case 0x30:
     return SWAP_B(this)
   case 0x31:
@@ -201,6 +219,10 @@ func (this *cpu) do_cb_op(op uint8) int {
     return SRL_A(this)
   case 0x7c:
     return BIT_7_H(this)
+  case 0x7f:
+    return BIT_7_A(this)
+  case 0x86:
+    return RES_0_HL(this)
   case 0x8c:
     return RES_1_H(this)
   case 0x87:
