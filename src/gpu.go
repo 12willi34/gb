@@ -6,13 +6,13 @@ package gb
 const (
   width = 160
   height = 144
-  hblank_mode = uint8(0)//uint8(0)
-  vblank_mode = uint8(1)//uint8(1)
-  oam_mode = uint8(2)//uint8(2)
-  data_mode = uint8(3)//uint8(3)
+  hblank_mode = uint8(0)
+  vblank_mode = uint8(1)
+  oam_mode = uint8(2)
+  data_mode = uint8(3)
   col_white = 0xff
-  col_light_gray = 0xff*(3/4)
-  col_dark_gray = 0xff*(1/4)
+  col_light_gray = 191
+  col_dark_gray = 63
   col_black = 0x00
 )
 
