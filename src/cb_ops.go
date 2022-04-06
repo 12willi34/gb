@@ -45,6 +45,46 @@ func SWAP_HL(this *cpu) int {
   return 16
 }
 
+func BIT_6_B(this *cpu) int {
+  this.bit(6, (*this).bc.r_high())
+  return 8
+}
+
+func BIT_6_C(this *cpu) int {
+  this.bit(6, this.bc.r_low())
+  return 8
+}
+
+func BIT_6_D(this *cpu) int {
+  this.bit(6, this.de.r_high())
+  return 8
+}
+
+func BIT_6_E(this *cpu) int {
+  this.bit(6, this.de.r_low())
+  return 8
+}
+
+func BIT_6_H(this *cpu) int {
+  this.bit(6, this.hl.r_high())
+  return 8
+}
+
+func BIT_6_L(this *cpu) int {
+  this.bit(6, this.hl.r_low())
+  return 8
+}
+
+func BIT_6_HL(this *cpu) int {
+  this.bit(6, this.mu.Read_8(this.hl.value))
+  return 16
+}
+
+func BIT_6_A(this *cpu) int {
+  this.bit(6, this.af.r_high())
+  return 8
+}
+
 func BIT_0_B(this *cpu) int {
   this.bit(0, this.bc.r_high())
   return 8
@@ -285,8 +325,43 @@ func BIT_2_HL(this *cpu) int {
   return 16
 }
 
-func BIT_6_B(this *cpu) int {
-  this.bit(6, (*this).bc.r_high())
+func BIT_1_B(this *cpu) int {
+  this.bit(1, (*this).bc.r_high())
+  return 8
+}
+
+func BIT_1_C(this *cpu) int {
+  this.bit(1, this.bc.r_low())
+  return 8
+}
+
+func BIT_1_D(this *cpu) int {
+  this.bit(1, this.de.r_high())
+  return 8
+}
+
+func BIT_1_E(this *cpu) int {
+  this.bit(1, this.de.r_low())
+  return 8
+}
+
+func BIT_1_H(this *cpu) int {
+  this.bit(1, this.hl.r_high())
+  return 8
+}
+
+func BIT_1_L(this *cpu) int {
+  this.bit(1, this.hl.r_low())
+  return 8
+}
+
+func BIT_1_HL(this *cpu) int {
+  this.bit(1, this.mu.Read_8(this.hl.value))
+  return 16
+}
+
+func BIT_1_A(this *cpu) int {
+  this.bit(1, this.af.r_high())
   return 8
 }
 
@@ -463,6 +538,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return BIT_0_HL(this)
   case 0x47:
     return BIT_0_A(this)
+  case 0x48:
+    return BIT_1_B(this)
+  case 0x49:
+    return BIT_1_C(this)
+  case 0x4a:
+    return BIT_1_D(this)
+  case 0x4b:
+    return BIT_1_E(this)
+  case 0x4c:
+    return BIT_1_H(this)
+  case 0x4d:
+    return BIT_1_L(this)
+  case 0x4e:
+    return BIT_1_HL(this)
+  case 0x4f:
+    return BIT_1_A(this)
   case 0x50:
     return BIT_2_B(this)
   case 0x51:
@@ -527,6 +618,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return BIT_5_HL(this)
   case 0x6f:
     return BIT_5_A(this)
+  case 0x70:
+    return BIT_6_B(this)
+  case 0x71:
+    return BIT_6_C(this)
+  case 0x72:
+    return BIT_6_D(this)
+  case 0x73:
+    return BIT_6_E(this)
+  case 0x74:
+    return BIT_6_H(this)
+  case 0x75:
+    return BIT_6_L(this)
+  case 0x76:
+    return BIT_6_HL(this)
+  case 0x77:
+    return BIT_6_A(this)
   case 0x78:
     return BIT_7_B(this)
   case 0x79:

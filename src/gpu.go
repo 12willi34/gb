@@ -220,7 +220,7 @@ func (this *Gpu) renderSprites() {
         res := (*this).getColour(uint8(colourNum), uint16(colourAddr))
         if(res == col_white) { continue }
         x := int(7 - pixel)
-        (*this).buffer[int(int(xPos) + x)][line] = res
+        (*this).buffer[line][int(int(xPos) + x)] = res
       }
     }
   }
