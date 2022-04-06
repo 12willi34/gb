@@ -204,9 +204,9 @@ func (this *Gpu) renderSprites() {
       if(yFlip) {
         l -= ySize
         l *= -1
+        l *= 2
       }
-      l *= 2
-      dataAddr := uint16(0x8000) + uint16(tileLocation*16) + uint16(l)
+      dataAddr := uint16(0x8000) + uint16(tileLocation)*16 + uint16(l)
       data1 := uint8((*(*this).mu).Read_8(dataAddr))
       data2 := uint8((*(*this).mu).Read_8(dataAddr + 1))
       for pixel := 7; pixel >= 0; pixel-- {
