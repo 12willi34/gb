@@ -1,13 +1,17 @@
 package gb
 
+//import "fmt"
+
 type memoryunit struct {
 	addr []uint8
   Processor *cpu
+  io io_controller
 }
 
-func NewMemoryUnit(boot [0x100]byte, rom []byte) memoryunit {
+func NewMemoryUnit(boot [0x100]byte, rom []byte, io io_controller) memoryunit {
 	mu := memoryunit {
 		addr: make([]uint8, 0x10000),
+    io: io,
 	}
   /*
   mu.addr[0x04] = 0x1e
@@ -78,6 +82,9 @@ func (this memoryunit) Write_8(i uint16, data uint8) {
     return
   } else if((i >= 0xfea0) && (i <= 0xfeff)) {
     return
+  } else if(i == 0xff00) {
+    this.addr[i] = this.io.ChangeMode(data & 0b00110000)
+    return
   } else if(i == 0xff04) {
     this.addr[0xff04] = 0
   } else if(i == 0xff05) {
@@ -103,8 +110,9 @@ func (this memoryunit) Write_16(i uint16, data uint16) {
 func (this memoryunit) read_io(i uint16) uint8 {
   switch i {
   case 0xff00:
-    //input
-    return 0xff
+    x := this.io.Get()
+    //fmt.Printf("%b\n", x)
+    return x
   case 0xff02:
     return 0xff
   case 0xff10:

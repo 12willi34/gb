@@ -20,6 +20,7 @@ type GameBoy struct {
   Gpu *Gpu
   first_rom_part []byte
   last_vblank int64
+  io io_controller
 
   //sdl
   w *sdl.Window
@@ -27,7 +28,8 @@ type GameBoy struct {
 }
 
 func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
-  mu := NewMemoryUnit(boot, rom)
+  io := NewIoController()
+  mu := NewMemoryUnit(boot, rom, io)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
   cpu_pointer := &cpu
@@ -44,6 +46,7 @@ func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
     Gpu: &gpu,
     first_rom_part: rom[:0x100],
     last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
+    io: io,
 
     w: nil,
   }
@@ -111,7 +114,14 @@ func (this GameBoy) sdl_loop() bool {
     this.Gpu.vblank = false
   }
   for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-    switch event.(type) {
+    switch t := event.(type) {
+    case *sdl.KeyboardEvent:
+      keyCode := t.Keysym.Sym
+      if(t.State == sdl.PRESSED && !(t.Repeat > 0)) {
+        this.io.SetBtn(int(keyCode), true)
+      } else if(t.State == sdl.RELEASED) {
+        this.io.SetBtn(int(keyCode), false)
+      }
     case *sdl.QuitEvent:
       return false
     }
