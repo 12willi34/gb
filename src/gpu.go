@@ -1,8 +1,5 @@
 package gb
 
-import "fmt"
-//import "strconv"
-
 const (
   width = 160
   height = 144
@@ -186,7 +183,6 @@ func (this *Gpu) getColour(colour uint8, addr uint16) uint8 {
 }
 
 func (this *Gpu) renderSprites() {
-  //lcdc := (*this).lcdc.get()
   use8x16 := bool((this.lcdc.get() & (1 << 2)) > 0)
   for ind := uint16(0); ind < 40; ind++ {
     sprite_ind := uint8(ind*4)
@@ -202,26 +198,26 @@ func (this *Gpu) renderSprites() {
     if((line >= int(yPos)) && (line < (int(yPos) + ySize))) {
       l := line - int(yPos)
       if(yFlip) {
-        l = ySize - l - 1
+        l = -1*(l - int(ySize))
       }
+      l *= 2
       dataAddr := uint16(0x8000) + uint16(tileLocation)*16 + uint16(l)
       data1 := uint8((*(*this).mu).Read_8(dataAddr))
       data2 := uint8((*(*this).mu).Read_8(dataAddr + 1))
-      for pixel := 0; pixel < 8; pixel++ {
+      for pixel := 7; pixel >= 0; pixel-- {
         colour := pixel
-        if(xFlip) { colour = 7 - colour - 1 }
+        if(xFlip) { colour = -1*(colour - 7) }
         colourNum := 0
-        if((data2 & (1 << colour)) > 0) { colourNum |= 1 << 1 }
-        if((data1 & (1 << colour)) > 0) { colourNum |= 1 << 0 }
-        if(colourNum == 0) { continue }
+        if((data2 & (1 << colour)) > 0) { colourNum += 1 }
+        if((data1 & (1 << colour)) > 0) { colourNum += 2 }
         colourAddr := 0xff48
         if((attributes & (1 << 4)) > 0) { colourAddr = 0xff49 }
         res := (*this).getColour(uint8(colourNum), uint16(colourAddr))
-        if(res == col_white) { continue }
-        x := int(xPos) + pixel//+ colour//int(7 - pixel)
-        //(*this).buffer[int(yPos) + l][int(int(xPos) + x)] = res
-        (*this).buffer[this.line.get()][x] = res
-        fmt.Println(x)
+        if(res == col_white) {
+          continue
+        }
+        x := uint8(7 - pixel)
+        (*this).buffer[this.line.get()][xPos + x] = res
       }
     }
   }
