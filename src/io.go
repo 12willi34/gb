@@ -40,9 +40,8 @@ func NewIoController() io_controller {
   }
 }
 
-func (this io_controller) ChangeMode(x uint8) uint8 {
+func (this io_controller) ChangeMode(x uint8) {
   this.mode = x
-  return this.Get()
 }
 
 func (this io_controller) SetBtn(btn int, state bool) {

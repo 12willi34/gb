@@ -18,12 +18,13 @@ type Debugger struct {
   Gpu *Gpu
   first_rom_part []byte
   global_i int
-  io io_controller
+  io *io_controller
 }
 
 func NewDebugger(boot [0x100]byte, rom []byte) Debugger {
   io := NewIoController()
-  mu := NewMemoryUnit(boot, rom, io)
+  io_pointer := &io
+  mu := NewMemoryUnit(boot, rom, io_pointer)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
   cpu_pointer := &cpu

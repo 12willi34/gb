@@ -20,7 +20,7 @@ type GameBoy struct {
   Gpu *Gpu
   first_rom_part []byte
   last_vblank int64
-  io io_controller
+  io *io_controller
 
   //sdl
   w *sdl.Window
@@ -29,7 +29,8 @@ type GameBoy struct {
 
 func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
   io := NewIoController()
-  mu := NewMemoryUnit(boot, rom, io)
+  io_pointer := &io
+  mu := NewMemoryUnit(boot, rom, io_pointer)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
   cpu_pointer := &cpu
@@ -46,7 +47,7 @@ func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
     Gpu: &gpu,
     first_rom_part: rom[:0x100],
     last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
-    io: io,
+    io: io_pointer,
 
     w: nil,
   }
