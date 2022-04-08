@@ -8,77 +8,92 @@ const btn_right = 1073741903
 const btn_a = 121
 const btn_b = 120
 const btn_select = 8
-const btn_start = 13
+var btn_start int = 13
 
-const ioRegister = 0xff00
+type key struct {
+  name string
+  code int
+  regPlace int
+  is_direction bool
+  state bool
+}
+
+func NewKey(n string, code, rp int) key {
+  return key {
+    name: n,
+    code: code,
+    regPlace: rp,
+    state: false,
+  }
+}
 
 type io_controller struct {
-  up_state bool
-  down_state bool
-  left_state bool
-  right_state bool
-  a_state bool
-  b_state bool
-  select_state bool
-  start_state bool
-
-  mode uint8
+  dirKeys []key
+  actionKeys []key
+  Direction bool
+  Action bool
 }
 
 func NewIoController() io_controller {
   return io_controller {
-    up_state: false,
-    down_state: false,
-    left_state: false,
-    right_state: false,
-    a_state: false,
-    b_state: false,
-    select_state: false,
-    start_state: false,
-
-    mode: 0,
+    dirKeys: []key {
+      NewKey("right", 1073741903, 0),
+      NewKey("left", 1073741904, 1),
+      NewKey("up", 1073741906, 2),
+      NewKey("down", 1073741905, 3),
+    },
+    actionKeys: []key {
+      NewKey("A", 121, 0),
+      NewKey("B", 120, 1),
+      NewKey("select", 8, 2),
+      NewKey("start", 13, 3),
+    },
+    Direction: false,
+    Action: false,
   }
 }
 
-func (this io_controller) ChangeMode(x uint8) {
-  this.mode = x
+func (this *io_controller) ChangeMode(x uint8) {
+  this.Direction = bool(0 == (x & (1 << 4)))
+  this.Action = bool(0 == (x & (1 << 5)))
 }
 
-func (this io_controller) SetBtn(btn int, state bool) {
-  switch(btn) {
-  case btn_up:
-    this.up_state = state
-  case btn_down:
-    this.down_state = state
-  case btn_left:
-    this.left_state = state
-  case btn_right:
-    this.right_state = state
-  case btn_a:
-    this.a_state = state
-  case btn_b:
-    this.b_state = state
-  case btn_select:
-    this.select_state = state
-  case btn_start:
-    this.start_state = state
+func (this *io_controller) Set(keyCode int, state bool) {
+  for i := 0; i < len(this.dirKeys); i++ {
+    if this.dirKeys[i].code == keyCode {
+      this.dirKeys[i].state = state
+      return
+    }
+  }
+  for i := 0; i < len(this.actionKeys); i++ {
+    if this.actionKeys[i].code == keyCode {
+      this.actionKeys[i].state = state
+      return
+    }
   }
 }
 
-func (this io_controller) Get() uint8 {
-  x := this.mode
-  if(0 == (x & (1 << 5))) {
-    //action
-    if(!this.start_state) { x |= (1 << 3) } else { x &= ^uint8(1 << 3) }
-    if(!this.select_state) { x |= (1 << 2) } else { x &= ^uint8(1 << 2) }
-    if(!this.b_state) { x |= (1 << 1) } else { x &= ^uint8(1 << 1) }
-    if(!this.a_state) { x |= (1 << 0) } else { x &= ^uint8(1 << 0) }
-  } else {
-    //direction
-    if(!this.down_state) { x |= (1 << 3) } else { x &= ^uint8(1 << 3) }
-    if(!this.up_state) { x |= (1 << 2) } else { x &= ^uint8(1 << 2) }
-    if(!this.left_state) { x |= (1 << 1) } else { x &= ^uint8(1 << 1) }
-    if(!this.right_state) { x |= (1 << 0) } else { x &= ^uint8(1 << 0) }
+func (this *io_controller) Get() uint8 {
+  x := uint8(0b00111111)
+  if(this.Direction) {
+    x &= ^uint8(1 << 4)
+    for i := 0; i < len(this.dirKeys); i++ {
+      if this.dirKeys[i].state {
+        x &= ^uint8(1 << this.dirKeys[i].regPlace)
+      } else {
+        x |= uint8(1 << this.dirKeys[i].regPlace)
+      }
+    }
+  }
+  if(this.Action) {
+    x &= ^uint8(1 << 5)
+    for i := 0; i < len(this.actionKeys); i++ {
+      if this.actionKeys[i].state {
+        x &= ^uint8(1 << this.actionKeys[i].regPlace)
+      } else {
+        x |= uint8(1 << this.actionKeys[i].regPlace)
+      }
+    }
   }
   return x
 }

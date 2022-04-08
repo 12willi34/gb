@@ -3,13 +3,14 @@ package gb
 type memoryunit struct {
 	addr []uint8
   Processor *cpu
-  io *io_controller
+  Io *io_controller
 }
 
-func NewMemoryUnit(boot [0x100]byte, rom []byte, io *io_controller) memoryunit {
+func NewMemoryUnit(boot [0x100]byte, rom []byte) memoryunit {
+  io := NewIoController()
 	mu := memoryunit {
 		addr: make([]uint8, 0x10000),
-    io: io,
+    Io: &io,
 	}
   /*
   mu.addr[0x04] = 0x1e
@@ -56,7 +57,7 @@ func NewMemoryUnit(boot [0x100]byte, rom []byte, io *io_controller) memoryunit {
   return mu
 }
 
-func (this memoryunit) Read_8(i uint16) uint8 {
+func (this *memoryunit) Read_8(i uint16) uint8 {
   if(i >= 0 && i < 0x8000) {
 	  return this.addr[i]
   }
@@ -72,7 +73,7 @@ func (this memoryunit) Read_8(i uint16) uint8 {
 	return this.addr[i]
 }
 
-func (this memoryunit) Write_8(i uint16, data uint8) {
+func (this *memoryunit) Write_8(i uint16, data uint8) {
   if(i < 0x8000) {
     return
   } else if((i >= 0xe000) && (i <= 0xfdff)) {
@@ -81,7 +82,8 @@ func (this memoryunit) Write_8(i uint16, data uint8) {
   } else if((i >= 0xfea0) && (i <= 0xfeff)) {
     return
   } else if(i == 0xff00) {
-    this.io.ChangeMode(data)
+    this.Io.ChangeMode(data)
+    this.addr[0xff00] = this.Io.Get()
     return
   } else if(i == 0xff04) {
     this.addr[0xff04] = 0
@@ -96,19 +98,19 @@ func (this memoryunit) Write_8(i uint16, data uint8) {
 	this.addr[i] = data
 }
 
-func (this memoryunit) Read_16(i uint16) uint16 {
+func (this *memoryunit) Read_16(i uint16) uint16 {
 	return uint16((uint16(this.addr[i])) | uint16(this.addr[i + 1]) << 8)
 }
 
-func (this memoryunit) Write_16(i uint16, data uint16) {
+func (this *memoryunit) Write_16(i uint16, data uint16) {
 	this.addr[i] = uint8(data & 0xFF)
 	this.addr[i + 1] = uint8(data >> 8)
 }
 
-func (this memoryunit) read_io(i uint16) uint8 {
+func (this *memoryunit) read_io(i uint16) uint8 {
   switch i {
   case 0xff00:
-    return this.io.Get()
+    return this.addr[i]
   case 0xff02:
     return 0xff
   case 0xff10:
@@ -160,10 +162,15 @@ func (this memoryunit) read_io(i uint16) uint8 {
   }
 }
 
-func (this memoryunit) dma(data uint8) {
+func (this *memoryunit) dma(data uint8) {
   var src uint16 = uint16(data)*uint16(0x100)
   for i := uint8(0); i < 0x9f; i++ {
     val := this.Read_8(src + uint16(i))
     this.Write_8(0xfe00 + uint16(i), val)
   }
+}
+
+func (this *memoryunit) SetBtn(keyCode int, state bool) {
+  this.Io.Set(keyCode, state)
+  this.addr[0xff00] = this.Io.Get()
 }
