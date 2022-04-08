@@ -1,15 +1,5 @@
 package gb
 
-//SDL
-const btn_up = 1073741906
-const btn_down = 1073741905
-const btn_left = 1073741904
-const btn_right = 1073741903
-const btn_a = 121
-const btn_b = 120
-const btn_select = 8
-var btn_start int = 13
-
 type key struct {
   name string
   code int
