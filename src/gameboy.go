@@ -116,9 +116,13 @@ func (this GameBoy) sdl_loop() bool {
       keyCode := t.Keysym.Sym
       if(t.State == sdl.PRESSED) {
         if(t.Repeat > 0) { break }
-        this.Mu.SetBtn(int(keyCode), true)
+        if(this.Mu.SetBtn(int(keyCode), true)) {
+          this.Interrupter.Request(4)
+        }
       } else if(t.State == sdl.RELEASED) {
-        this.Mu.SetBtn(int(keyCode), false)
+        if(this.Mu.SetBtn(int(keyCode), false)) {
+          this.Interrupter.Request(4)
+        }
       }
     case *sdl.QuitEvent:
       return false

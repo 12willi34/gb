@@ -133,6 +133,8 @@ func (this *memoryunit) dma(data uint8) {
   }
 }
 
-func (this *memoryunit) SetBtn(keyCode int, state bool) {
-  this.Io.Set(keyCode, state)
+func (this *memoryunit) SetBtn(keyCode int, state bool) bool {
+  res := this.Io.Set(keyCode, state)
+  this.addr[0xff00] = this.Io.Get()
+  return res
 }

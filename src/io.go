@@ -48,19 +48,20 @@ func (this *io_controller) ChangeMode(x uint8) {
   this.Action = bool(0 == (x & (1 << 5)))
 }
 
-func (this *io_controller) Set(keyCode int, state bool) {
+func (this *io_controller) Set(keyCode int, state bool) bool {
   for i := 0; i < len(this.dirKeys); i++ {
     if this.dirKeys[i].code == keyCode {
       this.dirKeys[i].state = state
-      return
+      return this.Direction
     }
   }
   for i := 0; i < len(this.actionKeys); i++ {
     if this.actionKeys[i].code == keyCode {
       this.actionKeys[i].state = state
-      return
+      return this.Action
     }
   }
+  return false
 }
 
 func (this *io_controller) Get() uint8 {
