@@ -112,6 +112,14 @@ func (this *cpu) bit(i uint8, val uint8) {
   this.set_f_h_carry(true)
 }
 
+func (this *cpu) set(i uint8, val uint8) uint8 {
+  return val | (1 << i)
+}
+
+func (this *cpu) res(i uint8, val uint8) uint8 {
+  return val & ^uint8(1 << i)
+}
+
 //=ADC
 func (this *cpu) adc(a uint8, b uint8) uint8 {
   carr := int16(0)
