@@ -744,12 +744,12 @@ func CALL(this *cpu) int {
 }
 
 func EI(this *cpu) int {
-  this.Interrupt = true
+  this.EnInterrupt = true
   return 4
 }
 
 func DI(this *cpu) int {
-  this.Interrupt = false
+  this.DisInterrupt = true
   return 4
 }
 
@@ -1111,9 +1111,7 @@ func XOR_HL(this *cpu) int {
 }
 
 func XOR_number(this *cpu) int {
-  t := *this
-  n := this.fetch()
-  t.af.w_high(this.xor(t.af.r_high(), n))
+  this.af.w_high(this.xor(this.af.r_high(), this.fetch()))
   return 8
 }
 

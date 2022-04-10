@@ -82,6 +82,11 @@ func (this Debugger) debug_loop() {
 }
 
 func (this Debugger) showStatus(boot bool) {
+  if global_s > 0 {
+    global_s--
+    return
+  }
+
   fmt.Println(">>>")
   fmt.Printf("op: %02x\n", this.Mu.addr[this.Cpu.pc.value])
   fmt.Printf("next op: %02x\n", this.Mu.addr[this.Cpu.pc.value + 1])
@@ -106,11 +111,6 @@ func (this Debugger) showStatus(boot bool) {
   fmt.Printf("sp: %04x\n", this.Cpu.sp.value)
   fmt.Printf("pc: %04x\n", this.Cpu.pc.value)
   fmt.Println()
-
-  if global_s > 0 {
-    global_s--
-    return
-  }
 
   x, _ := reader.ReadString('\n')
   num, err := strconv.ParseInt(x[:len(x) - 1], 10, 64)

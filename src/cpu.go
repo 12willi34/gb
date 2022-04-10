@@ -5,8 +5,8 @@ import "fmt"
 type cpu struct {
   mu *memoryunit
 
-  enableInterrupt bool
-  disableInterrupt bool
+  EnInterrupt bool
+  DisInterrupt bool
   Interrupt bool
 
   Halt bool
@@ -21,6 +21,8 @@ type cpu struct {
 func NewCPU(mu *memoryunit) cpu {
   res := cpu {
     mu: mu,
+    EnInterrupt: false,
+    DisInterrupt: false,
     Interrupt: false,
     Halt: false,
     af: Register {value: 0x0000,},

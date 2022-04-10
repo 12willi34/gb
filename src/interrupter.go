@@ -27,6 +27,16 @@ func (this *interrupter) Request(flag int) {
 }
 
 func (this *interrupter) handle() {
+  if(this.processor.EnInterrupt) {
+    this.processor.EnInterrupt = false
+    this.processor.Interrupt = true
+    return
+  }
+  if(this.processor.DisInterrupt) {
+    this.processor.DisInterrupt = false
+    this.processor.Interrupt = false
+    return
+  }
   if(this.processor.Interrupt) {
     flag := this.mu.Read_8(flag_register)
     enable := this.mu.Read_8(enable_register)
