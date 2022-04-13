@@ -135,11 +135,11 @@ func (this *Gpu) renderTiles() {
     }
     col := uint16(xPos/8)
     var tile_num int16
-    var tile_adr uint16 = background_start + row + col
-    var tile_loc uint16 = tile_start
+    tile_adr := background_start + row + col
+    tile_loc := tile_start
     if(unsigned_tile_address) {
-      tile_num = int16(uint8((*(*this).mu).Read_8(tile_adr)))
-      tile_loc += uint16(tile_num*16)
+      tile_num = int16(this.mu.Read_8(tile_adr))
+      tile_loc += uint16(tile_num)*16
     } else {
       tile_num = int16(int8((*(*this).mu).Read_8(tile_adr)))
       tile_loc = uint16(int32(tile_loc) + int32((tile_num + 128)*16))
@@ -147,7 +147,7 @@ func (this *Gpu) renderTiles() {
 
     line := (yPos % 8)*2
     val0 := (*(*this).mu).Read_8(tile_loc + uint16(line))
-    val1 := (*(*this).mu).Read_8(tile_loc + uint16(line) + uint16(1))
+    val1 := (*(*this).mu).Read_8(tile_loc + uint16(line) + 1)
 
     var colour_bit int = (((int(xPos) % 8) - 7)*-1)
 
@@ -184,41 +184,40 @@ func (this *Gpu) getColour(colour uint8, addr uint16) uint8 {
 
 func (this *Gpu) renderSprites() {
   use8x16 := bool((this.lcdc.get() & (1 << 2)) > 0)
+  line := this.line.get()
   for ind := uint16(0); ind < 40; ind++ {
     sprite_ind := uint8(ind*4)
     yPos := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind)) - 16)
+    var ySize int = 8
+    if(use8x16) { ySize = 16 }
+    if line < yPos || line >= yPos + uint8(ySize) { continue }
     xPos := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 1) - 8)
     tileLocation := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 2))
     attributes := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 3))
-    yFlip := bool((attributes & (1 << 6)) > 0)
-    xFlip := bool((attributes & (1 << 5)) > 0)
-    line := int((*this).line.get())
-    var ySize int = 8
-    if(use8x16) { ySize = 16 }
-    if((line >= int(yPos)) && (line < (int(yPos) + ySize))) {
-      l := line - int(yPos)
-      if(yFlip) {
-        l = -1*(l - int(ySize))
+    yFlip := (attributes & (1 << 6)) > 0
+    xFlip := (attributes & (1 << 5)) > 0
+    l := int(line - yPos)
+    if(yFlip) {
+      l = -1*(l - int(ySize))
+    }
+    l *= 2
+    dataAddr := 0x8000 + uint16(tileLocation)*16 + uint16(l)
+    data1 := this.mu.Read_8(dataAddr)
+    data2 := this.mu.Read_8(dataAddr + 1)
+    for pixel := 7; pixel >= 0; pixel-- {
+      colour := pixel
+      if(xFlip) { colour = -1*(colour - 7) }
+      colourNum := 0
+      if((data2 & (1 << colour)) > 0) { colourNum += 1 }
+      if((data1 & (1 << colour)) > 0) { colourNum += 2 }
+      colourAddr := 0xff48
+      if((attributes & (1 << 4)) > 0) { colourAddr = 0xff49 }
+      res := (*this).getColour(uint8(colourNum), uint16(colourAddr))
+      if(res == col_white) {
+        continue
       }
-      l *= 2
-      dataAddr := uint16(0x8000) + uint16(tileLocation)*16 + uint16(l)
-      data1 := uint8((*(*this).mu).Read_8(dataAddr))
-      data2 := uint8((*(*this).mu).Read_8(dataAddr + 1))
-      for pixel := 7; pixel >= 0; pixel-- {
-        colour := pixel
-        if(xFlip) { colour = -1*(colour - 7) }
-        colourNum := 0
-        if((data2 & (1 << colour)) > 0) { colourNum += 1 }
-        if((data1 & (1 << colour)) > 0) { colourNum += 2 }
-        colourAddr := 0xff48
-        if((attributes & (1 << 4)) > 0) { colourAddr = 0xff49 }
-        res := (*this).getColour(uint8(colourNum), uint16(colourAddr))
-        if(res == col_white) {
-          continue
-        }
-        x := uint8(7 - pixel)
-        (*this).buffer[this.line.get()][xPos + x] = res
-      }
+      x := uint8(7 - pixel)
+      (*this).buffer[this.line.get()][xPos + x] = res
     }
   }
 }
