@@ -98,7 +98,7 @@ func (this *Gpu) renderTiles() {
   sy := (*this).scroll.get_y()
   wx := (*this).window.get_x() - 7
   wy := (*this).window.get_y()
-  in_window := (((*this).lcdc.get() & (1 << 5)) > 0) && (wy <= (*this).line.get())
+  in_window := (wy <= (*this).line.get()) && (((*this).lcdc.get() & (1 << 5)) > 0)
 
   var tile_start uint16 = 0x8800
   unsigned_tile_address := false
@@ -127,10 +127,11 @@ func (this *Gpu) renderTiles() {
   } else {
     yPos = (*this).line.get() - wy
   }
+  line := (yPos % 8)*2
   row := uint16(yPos/8)*32
   for x := uint8(0); x < 160; x++ {
     xPos = x + sx
-    if(in_window && x >= wx) {
+    if(x >= wx && in_window) {
       xPos = x - wx
     }
     col := uint16(xPos/8)
@@ -144,40 +145,39 @@ func (this *Gpu) renderTiles() {
       tile_num = int16(int8((*(*this).mu).Read_8(tile_adr)))
       tile_loc = uint16(int32(tile_loc) + int32((tile_num + 128)*16))
     }
+    temp := tile_loc + uint16(line)
+    val0 := this.mu.Read_8(temp)
+    val1 := this.mu.Read_8(temp + 1)
 
-    line := (yPos % 8)*2
-    val0 := (*(*this).mu).Read_8(tile_loc + uint16(line))
-    val1 := (*(*this).mu).Read_8(tile_loc + uint16(line) + 1)
-
-    var colour_bit int = (((int(xPos) % 8) - 7)*-1)
+    colour_bit := (((int(xPos) % 8) - 7)*-1)
 
     colour := uint8(0)
-    if((val0 & (1 << uint8(colour_bit))) > 0) {
-      colour |= 1 << 1
+    if((val0 & (1 << colour_bit)) > 0) {
+      colour |= 2
     }
-    if((val1 & (1 << uint8(colour_bit))) > 0) {
+    if((val1 & (1 << colour_bit)) > 0) {
       colour |= 1
     }
-    (*this).buffer[(*this).line.get()][x] = this.getColour(colour, 0xff47)
+    this.buffer[this.line.get()][x] = this.getColour(colour, 0xff47)
   }
 }
 
 func (this *Gpu) getColour(colour uint8, addr uint16) uint8 {
-  var h = 1 + 2*colour
-  var l = 2*colour
-  palette := (*(*this).mu).Read_8(addr)
+  l := 2*colour
+  h := l + 1
+  palette := this.mu.Read_8(addr)
   res := uint8(0)
-  if((palette & (1 << h)) > 0) { res += 1 << 1 }
-  if((palette & (1 << l)) > 0) { res += 1 << 0 }
+  if((palette & (1 << h)) > 0) { res += 2 }
+  if((palette & (1 << l)) > 0) { res += 1 }
   switch(res) {
     case 0:
-      res = col_white
+      return col_white
     case 1:
-      res = col_light_gray
+      return col_light_gray
     case 2:
-      res = col_dark_gray
+      return col_dark_gray
     case 3:
-      res = col_black
+      return col_black
   }
   return res
 }

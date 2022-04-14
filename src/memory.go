@@ -40,6 +40,9 @@ func (this *memoryunit) Read_8(i uint16) uint8 {
 func (this *memoryunit) Write_8(i uint16, data uint8) {
   if(i < 0x8000) {
     return
+  } else if(i < 0xe000) {
+	  this.addr[i] = data
+    return
   } else if((i >= 0xe000) && (i <= 0xfdff)) {
     this.Write_8(i - 0x2000, data)
     return
