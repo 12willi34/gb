@@ -68,7 +68,7 @@ func (this GameBoy) Init() {
   this.r = renderer
   defer renderer.Destroy()
 
-  texture, err := renderer.CreateTexture(0, -1, width, height)
+  texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, width, height)
   if(err != nil) {
     fmt.Println("err creating texture")
     panic(err)
@@ -129,19 +129,26 @@ func (this GameBoy) sdl_loop() bool {
     }
   }
   if(this.Gpu.vblank) {
-    if(true) {
+    pixels, _, _ := this.t.Lock(nil)
+    i := 0
+    for y := int32(0); y < height; y++ {
       for x := int32(0); x < width; x++ {
-        for y := int32(0); y < height; y++ {
-          a := this.Gpu.buffer[y][x]
-          this.r.SetDrawColor(a, a, a, 255)
-          this.r.DrawPoint(x, y)
+        a := this.Gpu.buffer[y][x]
+        //b := (x + y*width)*4
+        for j := 0; j < 4; j++ {
+          pixels[i] = a
+          i++
         }
       }
-      this.r.Present()
-    } else {
-      fmt.Println("")
     }
-    this.w.UpdateSurface()
+    defer this.t.Unlock()
+
+    this.r.Clear()
+    this.r.Copy(this.t, nil, nil)
+    this.r.Present()
+
+    //todo: sdl.Delay(..)
+
     this.last_vblank = time.Now().UnixMilli()
     this.Gpu.vblank = false
   }
