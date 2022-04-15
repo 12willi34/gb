@@ -45,11 +45,11 @@ func NewGameBoy(boot [256]byte, rom []byte) GameBoy {
     Interrupter: interrupter_pointer,
     Gpu: &gpu,
     first_rom_part: rom[:0x100],
-    last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
+    last_vblank: 0,
   }
 }
 
-func (this GameBoy) Init() {
+func (this *GameBoy) Init() {
   fmt.Println("starting gameboy")
   pos := int32(sdl.WINDOWPOS_CENTERED)
   window, err := sdl.CreateWindow(title, pos, pos, width, height, sdl.WINDOW_SHOWN)
@@ -82,7 +82,7 @@ func (this GameBoy) Init() {
   this.loop()
 }
 
-func (this GameBoy) loop() {
+func (this *GameBoy) loop() {
   for this.sdl_loop() {
     this.Interrupter.handle()
     steps := this.Cpu.Step()
@@ -92,7 +92,7 @@ func (this GameBoy) loop() {
   }
 }
 
-func (this GameBoy) boot_loop() {
+func (this *GameBoy) boot_loop() {
   for this.sdl_loop() {
     this.Interrupter.handle()
     steps := this.Cpu.Step()
@@ -108,7 +108,7 @@ func (this GameBoy) boot_loop() {
   }
 }
 
-func (this GameBoy) sdl_loop() bool {
+func (this *GameBoy) sdl_loop() bool {
   if(this.Debug_mode) { return true }
   for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
     switch t := event.(type) {
@@ -134,7 +134,6 @@ func (this GameBoy) sdl_loop() bool {
     for y := int32(0); y < height; y++ {
       for x := int32(0); x < width; x++ {
         a := this.Gpu.buffer[y][x]
-        //b := (x + y*width)*4
         for j := 0; j < 4; j++ {
           pixels[i] = a
           i++
@@ -147,9 +146,11 @@ func (this GameBoy) sdl_loop() bool {
     this.r.Copy(this.t, nil, nil)
     this.r.Present()
 
-    //todo: sdl.Delay(..)
+    for time.Now().UnixMilli() - this.last_vblank < vblank_duration {
+      time.Sleep(5*time.Millisecond)
+    }
 
-    this.last_vblank = time.Now().UnixMilli()
+    this.last_vblank = int64(time.Now().UnixMilli())
     this.Gpu.vblank = false
   }
   return true
