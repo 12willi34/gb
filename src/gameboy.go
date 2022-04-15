@@ -24,10 +24,11 @@ type GameBoy struct {
   //sdl
   w *sdl.Window
   r *sdl.Renderer
+  t *sdl.Texture
   Debug_mode bool
 }
 
-func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
+func NewGameBoy(boot [256]byte, rom []byte) GameBoy {
   mu := NewMemoryUnit(boot, rom)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
@@ -45,9 +46,6 @@ func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
     Gpu: &gpu,
     first_rom_part: rom[:0x100],
     last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
-
-    w: nil,
-    r: nil,
   }
 }
 
@@ -55,20 +53,28 @@ func (this GameBoy) Init() {
   fmt.Println("starting gameboy")
   pos := int32(sdl.WINDOWPOS_CENTERED)
   window, err := sdl.CreateWindow(title, pos, pos, width, height, sdl.WINDOW_SHOWN)
-  this.w = window
   if(err != nil) {
     fmt.Println("err creating window")
     panic(err)
   }
+  this.w = window
   defer window.Destroy()
 
   renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
-  this.r = renderer
   if(err != nil) {
     fmt.Println("err creating renderer")
     panic(err)
   }
+  this.r = renderer
   defer renderer.Destroy()
+
+  texture, err := renderer.CreateTexture(0, -1, width, height)
+  if(err != nil) {
+    fmt.Println("err creating texture")
+    panic(err)
+  }
+  this.t = texture
+  defer texture.Destroy()
 
   timeBeforeBoot := time.Now().UnixMilli()
   this.boot_loop()
@@ -123,20 +129,15 @@ func (this GameBoy) sdl_loop() bool {
     }
   }
   if(this.Gpu.vblank) {
-    //surf, err := this.w.GetSurface()
     if(true) {
       for x := int32(0); x < width; x++ {
         for y := int32(0); y < height; y++ {
-          //surf.Set(x, y, color.Alpha {A: this.Gpu.buffer[y][x]})
           a := this.Gpu.buffer[y][x]
           this.r.SetDrawColor(a, a, a, 255)
           this.r.DrawPoint(x, y)
         }
       }
       this.r.Present()
-      for time.Now().UnixMilli() - this.last_vblank < vblank_duration {
-        time.Sleep(10*time.Millisecond)
-      }
     } else {
       fmt.Println("")
     }
