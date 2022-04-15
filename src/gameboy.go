@@ -4,7 +4,7 @@ import (
   "fmt"
   "time"
   "github.com/veandco/go-sdl2/sdl"
-  "image/color"
+  //"image/color"
   //"image"
 )
 
@@ -23,6 +23,7 @@ type GameBoy struct {
 
   //sdl
   w *sdl.Window
+  r *sdl.Renderer
   Debug_mode bool
 }
 
@@ -46,6 +47,7 @@ func NewGameBoy(boot [0x100]byte, rom []byte) GameBoy {
     last_vblank: time.Now().Add(-1*time.Hour).UnixMilli(),
 
     w: nil,
+    r: nil,
   }
 }
 
@@ -59,6 +61,15 @@ func (this GameBoy) Init() {
     panic(err)
   }
   defer window.Destroy()
+
+  renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+  this.r = renderer
+  if(err != nil) {
+    fmt.Println("err creating renderer")
+    panic(err)
+  }
+  defer renderer.Destroy()
+
   timeBeforeBoot := time.Now().UnixMilli()
   this.boot_loop()
   fmt.Printf("boot done (%dms)\n", time.Now().UnixMilli() - timeBeforeBoot)
@@ -93,24 +104,6 @@ func (this GameBoy) boot_loop() {
 
 func (this GameBoy) sdl_loop() bool {
   if(this.Debug_mode) { return true }
-  if(this.Gpu.vblank) {
-    surf, err := this.w.GetSurface()
-    if(err == nil) {
-      for x := 0; x < width; x++ {
-        for y := 0; y < height; y++ {
-          surf.Set(x, y, color.Alpha {A: this.Gpu.buffer[y][x]})
-        }
-      }
-      for time.Now().UnixMilli() - this.last_vblank < vblank_duration {
-        time.Sleep(10*time.Millisecond)
-      }
-    } else {
-      fmt.Println(err)
-    }
-    this.w.UpdateSurface()
-    this.last_vblank = time.Now().UnixMilli()
-    this.Gpu.vblank = false
-  }
   for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
     switch t := event.(type) {
     case *sdl.KeyboardEvent:
@@ -128,6 +121,28 @@ func (this GameBoy) sdl_loop() bool {
     case *sdl.QuitEvent:
       return false
     }
+  }
+  if(this.Gpu.vblank) {
+    //surf, err := this.w.GetSurface()
+    if(true) {
+      for x := int32(0); x < width; x++ {
+        for y := int32(0); y < height; y++ {
+          //surf.Set(x, y, color.Alpha {A: this.Gpu.buffer[y][x]})
+          a := this.Gpu.buffer[y][x]
+          this.r.SetDrawColor(a, a, a, 255)
+          this.r.DrawPoint(x, y)
+        }
+      }
+      this.r.Present()
+      for time.Now().UnixMilli() - this.last_vblank < vblank_duration {
+        time.Sleep(10*time.Millisecond)
+      }
+    } else {
+      fmt.Println("")
+    }
+    this.w.UpdateSurface()
+    this.last_vblank = time.Now().UnixMilli()
+    this.Gpu.vblank = false
   }
   return true
 }
