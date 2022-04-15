@@ -59,8 +59,9 @@ func (this GameBoy) Init() {
     panic(err)
   }
   defer window.Destroy()
+  timeBeforeBoot := time.Now().UnixMilli()
   this.boot_loop()
-  println("boot done")
+  fmt.Printf("boot done (%dms)\n", time.Now().UnixMilli() - timeBeforeBoot)
   this.loop()
 }
 

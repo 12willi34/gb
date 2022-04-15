@@ -122,10 +122,11 @@ func (this *Gpu) renderTiles() {
 
   var yPos uint8
   var xPos uint8
+  ly := (*this).line.get()
   if(!in_window) {
-    yPos = sy + (*this).line.get()
+    yPos = ly + sy
   } else {
-    yPos = (*this).line.get() - wy
+    yPos = ly - wy
   }
   line := (yPos % 8)*2
   row := uint16(yPos/8)*32
@@ -143,7 +144,7 @@ func (this *Gpu) renderTiles() {
       tile_loc += uint16(tile_num)*16
     } else {
       tile_num = int16(int8((*(*this).mu).Read_8(tile_adr)))
-      tile_loc = uint16(int32(tile_loc) + int32((tile_num + 128)*16))
+      tile_loc = uint16(int32(tile_loc) + (int32(tile_num) + 128)*16)
     }
     temp := tile_loc + uint16(line)
     val0 := this.mu.Read_8(temp)
@@ -158,7 +159,7 @@ func (this *Gpu) renderTiles() {
     if((val1 & (1 << colour_bit)) > 0) {
       colour |= 1
     }
-    this.buffer[this.line.get()][x] = this.getColour(colour, 0xff47)
+    this.buffer[ly][x] = this.getColour(colour, 0xff47)
   }
 }
 
