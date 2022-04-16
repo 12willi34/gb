@@ -365,6 +365,46 @@ func BIT_1_A(this *cpu) int {
   return 8
 }
 
+func RRC_B(this *cpu) int {
+  this.bc.w_high(this.rotate_right_carry(this.bc.r_high()))
+  return 8
+}
+
+func RRC_C(this *cpu) int {
+  this.bc.w_low(this.rotate_right_carry(this.bc.r_low()))
+  return 8
+}
+
+func RRC_D(this *cpu) int {
+  this.de.w_high(this.rotate_right_carry(this.de.r_high()))
+  return 8
+}
+
+func RRC_E(this *cpu) int {
+  this.de.w_low(this.rotate_right_carry(this.de.r_low()))
+  return 8
+}
+
+func RRC_H(this *cpu) int {
+  this.hl.w_high(this.rotate_right_carry(this.hl.r_high()))
+  return 8
+}
+
+func RRC_L(this *cpu) int {
+  this.hl.w_low(this.rotate_right_carry(this.hl.r_low()))
+  return 8
+}
+
+func RRC_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.rotate_right_carry(this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func RRC_A(this *cpu) int {
+  this.af.w_high(this.rotate_right_carry(this.af.r_high()))
+  return 8
+}
+
 func RL_A(this *cpu) int {
   a := this.rotate_left((*this).af.r_high())
   (*this).af.w_high(a)
@@ -546,6 +586,46 @@ func RES_0_HL(this *cpu) int {
 func RES_0_A(this *cpu) int {
   val := (*this).af.r_high() & ^uint8(1 << 0)
   (*this).af.w_high(val)
+  return 8
+}
+
+func SET_2_B(this *cpu) int {
+  this.bc.w_high(this.set(2, this.bc.r_high()))
+  return 8
+}
+
+func SET_2_C(this *cpu) int {
+  this.bc.w_low(this.set(2, this.bc.r_low()))
+  return 8
+}
+
+func SET_2_D(this *cpu) int {
+  this.de.w_high(this.set(2, this.de.r_high()))
+  return 8
+}
+
+func SET_2_E(this *cpu) int {
+  this.de.w_low(this.set(2, this.de.r_low()))
+  return 8
+}
+
+func SET_2_H(this *cpu) int {
+  this.hl.w_high(this.set(2, this.hl.r_high()))
+  return 8
+}
+
+func SET_2_L(this *cpu) int {
+  this.hl.w_low(this.set(2, this.hl.r_low()))
+  return 8
+}
+
+func SET_2_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.set(2, this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_2_A(this *cpu) int {
+  this.af.w_high(this.set(2, this.af.r_high()))
   return 8
 }
 
@@ -867,6 +947,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RES_7_HL(this)
   case 0xbf:
     return RES_7_A(this)
+  case 0xd0:
+    return SET_2_B(this)
+  case 0xd1:
+    return SET_2_C(this)
+  case 0xd2:
+    return SET_2_D(this)
+  case 0xd3:
+    return SET_2_E(this)
+  case 0xd4:
+    return SET_2_H(this)
+  case 0xd5:
+    return SET_2_L(this)
+  case 0xd6:
+    return SET_2_HL(this)
+  case 0xd7:
+    return SET_2_A(this)
   case 0xd8:
     return SET_3_B(this)
   case 0xd9:
@@ -902,44 +998,4 @@ func (this *cpu) do_cb_op(op uint8) int {
   default:
     return -1
   }
-}
-
-func RRC_B(this *cpu) int {
-  this.bc.w_high(this.rotate_right_carry(this.bc.r_high()))
-  return 8
-}
-
-func RRC_C(this *cpu) int {
-  this.bc.w_low(this.rotate_right_carry(this.bc.r_low()))
-  return 8
-}
-
-func RRC_D(this *cpu) int {
-  this.de.w_high(this.rotate_right_carry(this.de.r_high()))
-  return 8
-}
-
-func RRC_E(this *cpu) int {
-  this.de.w_low(this.rotate_right_carry(this.de.r_low()))
-  return 8
-}
-
-func RRC_H(this *cpu) int {
-  this.hl.w_high(this.rotate_right_carry(this.hl.r_high()))
-  return 8
-}
-
-func RRC_L(this *cpu) int {
-  this.hl.w_low(this.rotate_right_carry(this.hl.r_low()))
-  return 8
-}
-
-func RRC_HL(this *cpu) int {
-  this.mu.Write_8(this.hl.value, this.rotate_right_carry(this.mu.Read_8(this.hl.value)))
-  return 16
-}
-
-func RRC_A(this *cpu) int {
-  this.af.w_high(this.rotate_right_carry(this.af.r_high()))
-  return 8
 }
