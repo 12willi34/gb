@@ -449,6 +449,47 @@ func SRL_HL(this *cpu) int {
   return 16
 }
 
+func RES_7_B(this *cpu) int {
+  this.bc.w_high(this.res(7, this.bc.r_high()))
+  return 8
+}
+
+func RES_7_C(this *cpu) int {
+  this.bc.w_low(this.res(7, this.bc.r_low()))
+  return 8
+}
+
+func RES_7_D(this *cpu) int {
+  this.de.w_high(this.res(7, this.de.r_high()))
+  return 8
+}
+
+func RES_7_E(this *cpu) int {
+  this.de.w_low(this.res(7, this.de.r_low()))
+  return 8
+}
+
+func RES_7_H(this *cpu) int {
+  this.hl.w_high(this.res(7, this.hl.r_high()))
+  return 8
+}
+
+func RES_7_L(this *cpu) int {
+  this.hl.w_low(this.res(7, this.hl.r_low()))
+  return 8
+}
+
+func RES_7_HL(this *cpu) int {
+  hl := this.mu.Read_8(this.hl.value)
+  this.mu.Write_8(this.hl.value, this.res(7, hl))
+  return 16
+}
+
+func RES_7_A(this *cpu) int {
+  this.af.w_high(this.res(7, this.af.r_high()))
+  return 8
+}
+
 func RES_1_H(this *cpu) int {
   val := (*this).hl.r_high() & ^uint8(1 << 1)
   (*this).hl.w_high(val)
@@ -464,6 +505,46 @@ func RES_0_HL(this *cpu) int {
 func RES_0_A(this *cpu) int {
   val := (*this).af.r_high() & ^uint8(1 << 0)
   (*this).af.w_high(val)
+  return 8
+}
+
+func SET_3_B(this *cpu) int {
+  this.bc.w_high(this.set(3, this.bc.r_high()))
+  return 8
+}
+
+func SET_3_C(this *cpu) int {
+  this.bc.w_low(this.set(3, this.bc.r_low()))
+  return 8
+}
+
+func SET_3_D(this *cpu) int {
+  this.de.w_high(this.set(3, this.de.r_high()))
+  return 8
+}
+
+func SET_3_E(this *cpu) int {
+  this.de.w_low(this.set(3, this.de.r_low()))
+  return 8
+}
+
+func SET_3_H(this *cpu) int {
+  this.hl.w_high(this.set(3, this.hl.r_high()))
+  return 8
+}
+
+func SET_3_L(this *cpu) int {
+  this.hl.w_low(this.set(3, this.hl.r_low()))
+  return 8
+}
+
+func SET_3_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.set(3, this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_3_A(this *cpu) int {
+  this.af.w_high(this.set(3, this.af.r_high()))
   return 8
 }
 
@@ -713,6 +794,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RES_7_HL(this)
   case 0xbf:
     return RES_7_A(this)
+  case 0xd8:
+    return SET_3_B(this)
+  case 0xd9:
+    return SET_3_C(this)
+  case 0xda:
+    return SET_3_D(this)
+  case 0xdb:
+    return SET_3_E(this)
+  case 0xdc:
+    return SET_3_H(this)
+  case 0xdd:
+    return SET_3_L(this)
+  case 0xde:
+    return SET_3_HL(this)
+  case 0xdf:
+    return SET_3_A(this)
   case 0xf8:
     return SET_7_B(this)
   case 0xf9:
@@ -732,45 +829,4 @@ func (this *cpu) do_cb_op(op uint8) int {
   default:
     return -1
   }
-}
-
-func RES_7_B(this *cpu) int {
-  this.bc.w_high(this.res(7, this.bc.r_high()))
-  return 8
-}
-
-func RES_7_C(this *cpu) int {
-  this.bc.w_low(this.res(7, this.bc.r_low()))
-  return 8
-}
-
-func RES_7_D(this *cpu) int {
-  this.de.w_high(this.res(7, this.de.r_high()))
-  return 8
-}
-
-func RES_7_E(this *cpu) int {
-  this.de.w_low(this.res(7, this.de.r_low()))
-  return 8
-}
-
-func RES_7_H(this *cpu) int {
-  this.hl.w_high(this.res(7, this.hl.r_high()))
-  return 8
-}
-
-func RES_7_L(this *cpu) int {
-  this.hl.w_low(this.res(7, this.hl.r_low()))
-  return 8
-}
-
-func RES_7_HL(this *cpu) int {
-  hl := this.mu.Read_8(this.hl.value)
-  this.mu.Write_8(this.hl.value, this.res(7, hl))
-  return 16
-}
-
-func RES_7_A(this *cpu) int {
-  this.af.w_high(this.res(7, this.af.r_high()))
-  return 8
 }
