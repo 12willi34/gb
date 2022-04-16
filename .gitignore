@@ -1,4 +1,4 @@
 *.swp
-run
+run/main.go
 rom/*
 boot/*
