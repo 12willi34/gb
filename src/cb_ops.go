@@ -630,6 +630,86 @@ func RES_0_A(this *cpu) int {
   return 8
 }
 
+func SET_5_B(this *cpu) int {
+  this.bc.w_high(this.set(5, this.bc.r_high()))
+  return 8
+}
+
+func SET_5_C(this *cpu) int {
+  this.bc.w_low(this.set(5, this.bc.r_low()))
+  return 8
+}
+
+func SET_5_D(this *cpu) int {
+  this.de.w_high(this.set(5, this.de.r_high()))
+  return 8
+}
+
+func SET_5_E(this *cpu) int {
+  this.de.w_low(this.set(5, this.de.r_low()))
+  return 8
+}
+
+func SET_5_H(this *cpu) int {
+  this.hl.w_high(this.set(5, this.hl.r_high()))
+  return 8
+}
+
+func SET_5_L(this *cpu) int {
+  this.hl.w_low(this.set(5, this.hl.r_low()))
+  return 8
+}
+
+func SET_5_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.set(5, this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_5_A(this *cpu) int {
+  this.af.w_high(this.set(5, this.af.r_high()))
+  return 8
+}
+
+func SET_1_B(this *cpu) int {
+  this.bc.w_high(this.set(1, this.bc.r_high()))
+  return 8
+}
+
+func SET_1_C(this *cpu) int {
+  this.bc.w_low(this.set(1, this.bc.r_low()))
+  return 8
+}
+
+func SET_1_D(this *cpu) int {
+  this.de.w_high(this.set(1, this.de.r_high()))
+  return 8
+}
+
+func SET_1_E(this *cpu) int {
+  this.de.w_low(this.set(1, this.de.r_low()))
+  return 8
+}
+
+func SET_1_H(this *cpu) int {
+  this.hl.w_high(this.set(1, this.hl.r_high()))
+  return 8
+}
+
+func SET_1_L(this *cpu) int {
+  this.hl.w_low(this.set(1, this.hl.r_low()))
+  return 8
+}
+
+func SET_1_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.set(1, this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_1_A(this *cpu) int {
+  this.af.w_high(this.set(1, this.af.r_high()))
+  return 8
+}
+
 func SET_3_B(this *cpu) int {
   this.bc.w_high(this.set(3, this.bc.r_high()))
   return 8
@@ -1053,6 +1133,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RES_7_HL(this)
   case 0xbf:
     return RES_7_A(this)
+  case 0xc8:
+    return SET_1_B(this)
+  case 0xc9:
+    return SET_1_C(this)
+  case 0xca:
+    return SET_1_D(this)
+  case 0xcb:
+    return SET_1_E(this)
+  case 0xcc:
+    return SET_1_H(this)
+  case 0xcd:
+    return SET_1_L(this)
+  case 0xce:
+    return SET_1_HL(this)
+  case 0xcf:
+    return SET_1_A(this)
   case 0xd0:
     return SET_2_B(this)
   case 0xd1:
@@ -1085,6 +1181,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return SET_3_HL(this)
   case 0xdf:
     return SET_3_A(this)
+  case 0xe8:
+    return SET_5_B(this)
+  case 0xe9:
+    return SET_5_C(this)
+  case 0xea:
+    return SET_5_D(this)
+  case 0xeb:
+    return SET_5_E(this)
+  case 0xec:
+    return SET_5_H(this)
+  case 0xed:
+    return SET_5_L(this)
+  case 0xee:
+    return SET_5_HL(this)
+  case 0xef:
+    return SET_5_A(this)
   case 0xf8:
     return SET_7_B(this)
   case 0xf9:
