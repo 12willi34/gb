@@ -589,46 +589,6 @@ func RES_0_A(this *cpu) int {
   return 8
 }
 
-func SET_2_B(this *cpu) int {
-  this.bc.w_high(this.set(2, this.bc.r_high()))
-  return 8
-}
-
-func SET_2_C(this *cpu) int {
-  this.bc.w_low(this.set(2, this.bc.r_low()))
-  return 8
-}
-
-func SET_2_D(this *cpu) int {
-  this.de.w_high(this.set(2, this.de.r_high()))
-  return 8
-}
-
-func SET_2_E(this *cpu) int {
-  this.de.w_low(this.set(2, this.de.r_low()))
-  return 8
-}
-
-func SET_2_H(this *cpu) int {
-  this.hl.w_high(this.set(2, this.hl.r_high()))
-  return 8
-}
-
-func SET_2_L(this *cpu) int {
-  this.hl.w_low(this.set(2, this.hl.r_low()))
-  return 8
-}
-
-func SET_2_HL(this *cpu) int {
-  this.mu.Write_8(this.hl.value, this.set(2, this.mu.Read_8(this.hl.value)))
-  return 16
-}
-
-func SET_2_A(this *cpu) int {
-  this.af.w_high(this.set(2, this.af.r_high()))
-  return 8
-}
-
 func SET_3_B(this *cpu) int {
   this.bc.w_high(this.set(3, this.bc.r_high()))
   return 8
@@ -710,6 +670,81 @@ func SET_7_A(this *cpu) int {
   return 8
 }
 
+func SLA_B(this *cpu) int {
+  this.bc.w_high(this.shift_left_carry(this.bc.r_high()))
+  return 8
+}
+
+func SLA_C(this *cpu) int {
+  this.bc.w_low(this.shift_left_carry(this.bc.r_low()))
+  return 8
+}
+
+func SLA_D(this *cpu) int {
+  this.de.w_high(this.shift_left_carry(this.de.r_high()))
+  return 8
+}
+
+func SLA_E(this *cpu) int {
+  this.de.w_low(this.shift_left_carry(this.de.r_low()))
+  return 8
+}
+
+func SLA_H(this *cpu) int {
+  this.hl.w_high(this.shift_left_carry(this.hl.r_high()))
+  return 8
+}
+
+func SLA_L(this *cpu) int {
+  this.hl.w_low(this.shift_left_carry(this.hl.r_low()))
+  return 8
+}
+
+func SLA_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.shift_left_carry(this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_2_B(this *cpu) int {
+  this.bc.w_high(this.set(2, this.bc.r_high()))
+  return 8
+}
+
+func SET_2_C(this *cpu) int {
+  this.bc.w_low(this.set(2, this.bc.r_low()))
+  return 8
+}
+
+func SET_2_D(this *cpu) int {
+  this.de.w_high(this.set(2, this.de.r_high()))
+  return 8
+}
+
+func SET_2_E(this *cpu) int {
+  this.de.w_low(this.set(2, this.de.r_low()))
+  return 8
+}
+
+func SET_2_H(this *cpu) int {
+  this.hl.w_high(this.set(2, this.hl.r_high()))
+  return 8
+}
+
+func SET_2_L(this *cpu) int {
+  this.hl.w_low(this.set(2, this.hl.r_low()))
+  return 8
+}
+
+func SET_2_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.set(2, this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_2_A(this *cpu) int {
+  this.af.w_high(this.set(2, this.af.r_high()))
+  return 8
+}
+
 func SLA_A(this *cpu) int {
   this.af.w_high(this.shift_left_carry(this.af.r_high()))
   return 8
@@ -747,6 +782,20 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RL_L(this)
   case 0x17:
     return RL_A(this)
+  case 0x20:
+    return SLA_B(this)
+  case 0x21:
+    return SLA_C(this)
+  case 0x22:
+    return SLA_D(this)
+  case 0x23:
+    return SLA_E(this)
+  case 0x24:
+    return SLA_H(this)
+  case 0x25:
+    return SLA_L(this)
+  case 0x26:
+    return SLA_HL(this)
   case 0x27:
     return SLA_A(this)
   case 0x30:
