@@ -191,8 +191,10 @@ func (this *Gpu) renderSprites() {
     yPos := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind)) - 16)
     var ySize int = 8
     if(use8x16) { ySize = 16 }
-    if line < yPos || line >= yPos + uint8(ySize) { continue }
     xPos := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 1) - 8)
+    if line < yPos || line >= yPos + uint8(ySize) { continue }
+    if yPos == 0 || yPos >= 160 { continue }
+    if xPos == 0 || xPos >= 168 { continue }
     tileLocation := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 2))
     attributes := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 3))
     yFlip := (attributes & (1 << 6)) > 0
@@ -218,7 +220,7 @@ func (this *Gpu) renderSprites() {
         continue
       }
       x := uint8(7 - pixel)
-      (*this).buffer[this.line.get()][xPos + x] = res
+      (*this).buffer[line][xPos + x] = res
     }
   }
 }
