@@ -4,8 +4,6 @@ import (
   "fmt"
   "time"
   "github.com/veandco/go-sdl2/sdl"
-  //"image/color"
-  //"image"
 )
 
 const blank_cycles = 69833
@@ -110,25 +108,25 @@ func (this *GameBoy) boot_loop() {
 
 func (this *GameBoy) sdl_loop() bool {
   if(this.Debug_mode) { return true }
-  for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-    switch t := event.(type) {
-    case *sdl.KeyboardEvent:
-      keyCode := t.Keysym.Sym
-      if(t.State == sdl.PRESSED) {
-        if(t.Repeat > 0) { break }
-        if(this.Mu.SetBtn(int(keyCode), true)) {
-          this.Interrupter.Request(4)
-        }
-      } else if(t.State == sdl.RELEASED) {
-        if(this.Mu.SetBtn(int(keyCode), false)) {
-          this.Interrupter.Request(4)
-        }
-      }
-    case *sdl.QuitEvent:
-      return false
-    }
-  }
   if(this.Gpu.vblank) {
+    for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+      switch t := event.(type) {
+      case *sdl.KeyboardEvent:
+        keyCode := t.Keysym.Sym
+        if(t.State == sdl.PRESSED) {
+          if(t.Repeat > 0) { break }
+          if(this.Mu.SetBtn(int(keyCode), true)) {
+            this.Interrupter.Request(4)
+          }
+        } else if(t.State == sdl.RELEASED) {
+          if(this.Mu.SetBtn(int(keyCode), false)) {
+            this.Interrupter.Request(4)
+          }
+        }
+      case *sdl.QuitEvent:
+        return false
+      }
+    }
     pixels, _, _ := this.t.Lock(nil)
     i := 0
     for y := int32(0); y < height; y++ {
@@ -141,15 +139,12 @@ func (this *GameBoy) sdl_loop() bool {
       }
     }
     defer this.t.Unlock()
-
     this.r.Clear()
     this.r.Copy(this.t, nil, nil)
     this.r.Present()
-
     for time.Now().UnixMilli() - this.last_vblank < vblank_duration {
       time.Sleep(5*time.Millisecond)
     }
-
     this.last_vblank = int64(time.Now().UnixMilli())
     this.Gpu.vblank = false
   }
