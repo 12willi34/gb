@@ -213,6 +213,17 @@ func (this *cpu) rla(a uint8) uint8 {
   return res
 }
 
+//=RLC
+func (this *cpu) rlc(val uint8) uint8 {
+  carry := val & 1
+  res := (val << 1) | carry
+  this.set_f_zero(res == 0)
+  this.set_f_subtr(false)
+  this.set_f_h_carry(false)
+  this.set_f_carry(carry == 1)
+  return res
+}
+
 //=RRC
 func (this *cpu) rotate_right_carry(val uint8) uint8 {
   carry := val & 1

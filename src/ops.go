@@ -1237,6 +1237,12 @@ func CCF(this *cpu) int {
   return 4
 }
 
+func RRA(this *cpu) int {
+  this.af.w_high(this.rotate_right_carry(this.af.r_high()))
+  this.set_f_zero(false)
+  return 4
+}
+
 func RRCA(this *cpu) int {
   val := (*this).af.r_high()
   res := uint8(val >> 1) | uint8((val & 1) << 7)
@@ -1529,6 +1535,8 @@ func (this *cpu) do_op(op uint8) int {
     return DEC_E(this)
   case 0x1e:
     return LD_E_n(this)
+  case 0x1f:
+    return RRA(this)
   case 0x20:
     return JR_nZ(this)
   case 0x21:
@@ -1981,4 +1989,3 @@ func (this *cpu) do_op(op uint8) int {
     return -1
   }
 }
-
