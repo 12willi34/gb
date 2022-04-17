@@ -706,6 +706,46 @@ func RES_1_A(this *cpu) int {
   return 8
 }
 
+func RLC_B(this *cpu) int {
+  this.bc.w_high(this.rlc(this.bc.r_high()))
+  return 8
+}
+
+func RLC_C(this *cpu) int {
+  this.bc.w_low(this.rlc(this.bc.r_low()))
+  return 8
+}
+
+func RLC_D(this *cpu) int {
+  this.de.w_high(this.rlc(this.de.r_high()))
+  return 8
+}
+
+func RLC_E(this *cpu) int {
+  this.de.w_low(this.rlc(this.de.r_low()))
+  return 8
+}
+
+func RLC_H(this *cpu) int {
+  this.hl.w_high(this.rlc(this.hl.r_high()))
+  return 8
+}
+
+func RLC_L(this *cpu) int {
+  this.hl.w_low(this.rlc(this.hl.r_low()))
+  return 8
+}
+
+func RLC_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.rlc(this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func RLC_A(this *cpu) int {
+  this.af.w_high(this.rlc(this.af.r_high()))
+  return 8
+}
+
 func SET_0_B(this *cpu) int {
   this.bc.w_high(this.set(0, this.bc.r_high()))
   return 8
@@ -1035,6 +1075,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RL_L(this)
   case 0x17:
     return RL_A(this)
+  case 0x18:
+    return RR_B(this)
+  case 0x19:
+    return RR_C(this)
+  case 0x1a:
+    return RR_D(this)
+  case 0x1b:
+    return RR_E(this)
+  case 0x1c:
+    return RR_H(this)
+  case 0x1d:
+    return RR_L(this)
+  case 0x1e:
+    return RR_HL(this)
+  case 0x1f:
+    return RR_A(this)
   case 0x20:
     return SLA_B(this)
   case 0x21:
@@ -1396,42 +1452,42 @@ func (this *cpu) do_cb_op(op uint8) int {
   }
 }
 
-func RLC_B(this *cpu) int {
-  this.bc.w_high(this.rlc(this.bc.r_high()))
+func RR_B(this *cpu) int {
+  this.bc.w_high(this.rotate_right(this.bc.r_high()))
   return 8
 }
 
-func RLC_C(this *cpu) int {
-  this.bc.w_low(this.rlc(this.bc.r_low()))
+func RR_C(this *cpu) int {
+  this.bc.w_low(this.rotate_right(this.bc.r_low()))
   return 8
 }
 
-func RLC_D(this *cpu) int {
-  this.de.w_high(this.rlc(this.de.r_high()))
+func RR_D(this *cpu) int {
+  this.de.w_high(this.rotate_right(this.de.r_high()))
   return 8
 }
 
-func RLC_E(this *cpu) int {
-  this.de.w_low(this.rlc(this.de.r_low()))
+func RR_E(this *cpu) int {
+  this.de.w_low(this.rotate_right(this.de.r_low()))
   return 8
 }
 
-func RLC_H(this *cpu) int {
-  this.hl.w_high(this.rlc(this.hl.r_high()))
+func RR_H(this *cpu) int {
+  this.hl.w_high(this.rotate_right(this.hl.r_high()))
   return 8
 }
 
-func RLC_L(this *cpu) int {
-  this.hl.w_low(this.rlc(this.hl.r_low()))
+func RR_L(this *cpu) int {
+  this.hl.w_low(this.rotate_right(this.hl.r_low()))
   return 8
 }
 
-func RLC_HL(this *cpu) int {
-  this.mu.Write_8(this.hl.value, this.rlc(this.mu.Read_8(this.hl.value)))
+func RR_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.rotate_right(this.mu.Read_8(this.hl.value)))
   return 16
 }
 
-func RLC_A(this *cpu) int {
-  this.af.w_high(this.rlc(this.af.r_high()))
+func RR_A(this *cpu) int {
+  this.af.w_high(this.rotate_right(this.af.r_high()))
   return 8
 }

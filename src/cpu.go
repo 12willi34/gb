@@ -235,6 +235,20 @@ func (this *cpu) rotate_right_carry(val uint8) uint8 {
   return res
 }
 
+//=RR
+func (this *cpu) rotate_right(val uint8) uint8 {
+  carry := val & 1
+  res := val >> 1
+  if(this.get_f_carry()) {
+    res |= 1 << 7
+  }
+  this.set_f_zero(res == 0)
+  this.set_f_subtr(false)
+  this.set_f_h_carry(false)
+  this.set_f_carry(carry == 1)
+  return res
+}
+
 //=OR
 func (this *cpu) or(a uint8, b uint8) uint8 {
   a |= b
