@@ -171,7 +171,7 @@ func (this *cpu) subtract(a uint8, b uint8) uint8 {
 }
 
 //=SBC
-func (this *cpu) subtract_carry(a uint8, b uint8) uint8 {
+func (this *cpu) subtract_carry(b uint8, a uint8) uint8 {
   carry := uint16(0)
   if((*this).get_f_carry()) {carry = uint16(1)}
   res := uint16(a) - (uint16(b) + carry)
