@@ -168,8 +168,8 @@ func (this *Gpu) getColour(colour uint8, addr uint16) uint8 {
   h := l + 1
   palette := this.mu.Read_8(addr)
   res := uint8(0)
-  if((palette & (1 << h)) > 0) { res += 2 }
-  if((palette & (1 << l)) > 0) { res += 1 }
+  if((palette & (1 << h)) > 0) { res += 1 }
+  if((palette & (1 << l)) > 0) { res += 2 }
   switch(res) {
     case 0:
       return col_white
