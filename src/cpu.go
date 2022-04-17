@@ -215,12 +215,15 @@ func (this *cpu) rla(a uint8) uint8 {
 
 //=RLC
 func (this *cpu) rlc(val uint8) uint8 {
-  carry := val & 1
-  res := (val << 1) | carry
+  carry := 0 < val & (1 << 7)
+  res := (val << 1)
+  if(carry) {
+    res |= 1
+  }
   this.set_f_zero(res == 0)
   this.set_f_subtr(false)
   this.set_f_h_carry(false)
-  this.set_f_carry(carry == 1)
+  this.set_f_carry(carry)
   return res
 }
 

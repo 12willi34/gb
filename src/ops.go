@@ -1418,13 +1418,8 @@ func LDHL_SP_number(this *cpu) int {
 }
 
 func RLCA(this *cpu) int {
-  a := (*this).af.r_high()
-  res := uint8(a << 1) | (a >> 7)
-  (*this).af.w_high(res)
+  this.af.w_high(this.rlc(this.af.r_high()))
   this.set_f_zero(false)
-  this.set_f_subtr(false)
-  this.set_f_h_carry(false)
-  this.set_f_carry(res > 0x7f)
   return 4
 }
 
