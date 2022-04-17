@@ -142,10 +142,11 @@ func (this *GameBoy) sdl_loop() bool {
     this.r.Clear()
     this.r.Copy(this.t, nil, nil)
     this.r.Present()
-    for time.Now().UnixMilli() - this.last_vblank < vblank_duration {
-      time.Sleep(5*time.Millisecond)
+    took := time.Now().UnixMilli() - this.last_vblank
+    if took < vblank_duration {
+      sdl.Delay(uint32(vblank_duration - took))
     }
-    this.last_vblank = int64(time.Now().UnixMilli())
+    this.last_vblank = time.Now().UnixMilli()
     this.Gpu.vblank = false
   }
   return true
