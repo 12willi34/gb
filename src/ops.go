@@ -1080,33 +1080,27 @@ func XOR_C(this *cpu) int {
 }
 
 func XOR_D(this *cpu) int {
-  t := *this
-  t.af.w_high(this.xor(t.af.r_high(), t.de.r_high()))
+  this.af.w_high(this.xor(this.af.r_high(), this.de.r_high()))
   return 4
 }
 
 func XOR_E(this *cpu) int {
-  t := *this
-  t.af.w_high(this.xor(t.af.r_high(), t.de.r_low()))
+  this.af.w_high(this.xor(this.af.r_high(), this.de.r_low()))
   return 4
 }
 
 func XOR_H(this *cpu) int {
-  t := *this
-  t.af.w_high(this.xor(t.af.r_high(), t.hl.r_high()))
+  this.af.w_high(this.xor(this.af.r_high(), this.hl.r_high()))
   return 4
 }
 
 func XOR_L(this *cpu) int {
-  t := *this
-  t.af.w_high(this.xor(t.af.r_high(), t.hl.r_low()))
+  this.af.w_high(this.xor(this.af.r_high(), this.hl.r_low()))
   return 4
 }
 
 func XOR_HL(this *cpu) int {
-  t := *this
-  hl := (*(t.mu)).Read_8(t.hl.value)
-  t.af.w_high(this.xor(t.af.r_high(), hl))
+  this.af.w_high(this.xor(this.af.r_high(), this.mu.Read_8(this.hl.value)))
   return 8
 }
 
