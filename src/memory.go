@@ -51,6 +51,15 @@ func (this *memoryunit) Write_8(i uint16, data uint8) {
   } else if(i == 0xff00) {
     this.Io.ChangeMode(data)
     return
+  } else if(i == 0xff02) {
+    if(data == 0x81) {
+      //serial transfer requested
+      // -> always rejected
+      this.addr[0xff01] = 0xff
+      this.addr[0xff02] = 0x01
+      this.addr[0xff0f] |= (1 << 3)
+      return
+    }
   } else if(i == 0xff04) {
     this.addr[0xff04] = 0
   } else if(i == 0xff05) {
