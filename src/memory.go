@@ -4,26 +4,36 @@ type memoryunit struct {
 	addr []uint8
   Processor *cpu
   Io *io_controller
+  cart *Cartridge
 }
 
-func NewMemoryUnit(boot [0x100]byte, rom []byte) memoryunit {
+func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
   io := NewIoController()
 	mu := memoryunit {
 		addr: make([]uint8, 0x10000),
     Io: &io,
 	}
-  for i := 0; i < 0x8000 && i < len(rom); i++ {
-    mu.addr[i] = rom[i]
-  }
   for i := 0; i < 0x100 && i < len(boot); i++ {
     mu.addr[i] = boot[i]
   }
+  for i := 0x100; i < 0x4000 && i < len(rom); i++ {
+    mu.addr[i] = uint8(rom[i])
+  }
+  cartRom := [16384]uint8{}
+  for i := 0x4000; i < 0x7ffff && i < len(rom); i++ {
+    cartRom[i - 0x4000] = uint8(rom[i])
+  }
+  cart := NewCartridge(cartRom)
+  mu.cart = &cart
   return mu
 }
 
 func (this *memoryunit) Read_8(i uint16) uint8 {
-  if(i >= 0 && i < 0x8000) {
+  if(i >= 0 && i < 0x4000) {
 	  return this.addr[i]
+  }
+  if(i >= 0x4000 && i <= 0x7fff) {
+    return (*this.cart).Read(i)
   }
   if(i >= 0xe000 && i <= 0xfdff) {
 	  return this.Read_8(i - 0x2000)
@@ -39,6 +49,7 @@ func (this *memoryunit) Read_8(i uint16) uint8 {
 
 func (this *memoryunit) Write_8(i uint16, data uint8) {
   if(i < 0x8000) {
+    (*this.cart).Write(i, data)
     return
   } else if(i < 0xe000) {
 	  this.addr[i] = data
