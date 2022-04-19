@@ -23,7 +23,7 @@ func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
   for i := 0x4000; i <= 0x7fff && i < len(rom); i++ {
     cartRom[i - 0x4000] = uint8(rom[i])
   }
-  cart := NewCartridge(cartRom)
+  cart := NewCartridge(cartRom, mu.addr[0x147])
   mu.cart = &cart
   return mu
 }
