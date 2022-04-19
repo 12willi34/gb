@@ -20,7 +20,7 @@ func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
     mu.addr[i] = uint8(rom[i])
   }
   cartRom := [16384]uint8{}
-  for i := 0x4000; i < 0x7ffff && i < len(rom); i++ {
+  for i := 0x4000; i <= 0x7fff && i < len(rom); i++ {
     cartRom[i - 0x4000] = uint8(rom[i])
   }
   cart := NewCartridge(cartRom)
@@ -29,7 +29,7 @@ func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
 }
 
 func (this *memoryunit) Read_8(i uint16) uint8 {
-  if(i >= 0 && i < 0x4000) {
+  if(i >= 0 && i <= 0x3fff) {
 	  return this.addr[i]
   }
   if(i >= 0x4000 && i <= 0x7fff) {
