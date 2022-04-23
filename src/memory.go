@@ -16,23 +16,23 @@ func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
   for i := 0; i < 0x100 && i < len(boot); i++ {
     mu.addr[i] = boot[i]
   }
-  for i := 0x100; i < 0x4000 && i < len(rom); i++ {
-    mu.addr[i] = uint8(rom[i])
-  }
   cartRom := []uint8 {}
-  for i := 0x4000; i < len(rom); i++ {
+  for i := 0; i < len(rom); i++ {
     cartRom = append(cartRom, uint8(rom[i]))
   }
-  cart := NewCartridge(cartRom, mu.addr[0x147])
+  cart := NewCartridge(cartRom, uint8(rom[0x147]))
   mu.cart = &cart
   return mu
 }
 
 func (this *memoryunit) Read_8(i uint16) uint8 {
-  if(i >= 0 && i <= 0x3fff) {
-	  return this.addr[i]
+  if(i < 0x100) {
+    return this.addr[i]
   }
-  if(i >= 0x4000 && i <= 0x7fff) {
+  if(i >= 0x0100 && i <= 0x7fff) {
+    return (*this.cart).Read(i)
+  }
+  if(i >= 0xa000 && i <= 0xbfff) {
     return (*this.cart).Read(i)
   }
   if(i >= 0xe000 && i <= 0xfdff) {
@@ -51,35 +51,46 @@ func (this *memoryunit) Write_8(i uint16, data uint8) {
   if(i < 0x8000) {
     (*this.cart).Write(i, data)
     return
-  } else if(i >= 0xa000 && i <= 0xbfff) {
+  }
+  if(i >= 0xa000 && i <= 0xbfff) {
     (*this.cart).Write(i, data)
-  } else if(i < 0xe000) {
+    return
+  }
+  if(i < 0xe000) {
 	  this.addr[i] = data
     return
-  } else if((i >= 0xe000) && (i <= 0xfdff)) {
+  }
+  if(i >= 0xe000 && i <= 0xfdff) {
     this.Write_8(i - 0x2000, data)
     return
-  } else if((i >= 0xfea0) && (i <= 0xfeff)) {
+  }
+  if(i >= 0xfea0 && i <= 0xfeff) {
     return
-  } else if(i == 0xff00) {
+  }
+  if(i == 0xff00) {
     this.Io.ChangeMode(data)
     return
-  } else if(i == 0xff02) {
-    if(data == 0x81) {
-      //serial transfer requested
-      // -> always rejected
-      this.addr[0xff01] = 0xff
-      this.addr[0xff02] = 0x01
-      this.addr[0xff0f] |= (1 << 3)
-      return
-    }
-  } else if(i == 0xff04) {
-    this.addr[0xff04] = 0
-  } else if(i == 0xff05) {
+  }
+  if(i == 0xff02 && data == 0x81) {
+    //serial transfer requested
+    // -> always rejected
+    this.addr[0xff01] = 0xff
+    this.addr[0xff02] = 0x01
+    this.addr[0xff0f] |= (1 << 3)
     return
-  } else if(i == 0xff46) {
+  }
+  if(i == 0xff04) {
+    this.addr[0xff04] = 0
+    return
+  }
+  if(i == 0xff05) {
+    return
+  }
+  if(i == 0xff46) {
     this.dma(data)
-  } else if(i == 0xff44) {
+    return
+  }
+  if(i == 0xff44) {
     this.addr[0xff44] = 0
     return
   }

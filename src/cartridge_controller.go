@@ -11,38 +11,43 @@ type Cartridge interface {
 
 type Cartridge_0 struct {
   rom []uint8
+  ram []uint8
 }
 
 func (this Cartridge_0) Read(i uint16) uint8 {
-  return this.rom[i - 0x4000]
+  if(i < 0x8000) {
+    return this.rom[i]
+  }
+  return this.ram[i]
 }
 
 func (this Cartridge_0) Write(i uint16, d uint8) {
-  return
+  if(i > 0x8000) {
+    this.ram[i - 0xa000] = d
+  }
 }
 
 //MBC 1
 
 type Cartridge_1 struct {
   rom []uint8
-  romBank uint16
+  romBank uint32
   romBanking bool
 
   ram []byte
-  ramBank uint16
+  ramBank uint32
   ramEnabled bool
 }
 
 
 func (this Cartridge_1) Read(i uint16) uint8 {
-  switch {
-  case i < 0x8000:
-    return this.rom[(i - 0x4000 + (this.romBank - 1)*0x4000)]
-  case i >= 0xa000 && i <= 0xbfff:
-    return this.ram[(0x2000)*this.ramBank + i - 0xa000]
-  default:
-    return 0
+  if(i < 0x4000) {
+    return this.rom[i]
   }
+  if(i < 0x8000) {
+    return this.rom[uint32(i - 0x4000) + this.romBank*0x4000]
+  }
+  return this.ram[this.ramBank*0x2000 + uint32(i - 0xa000)]
 }
 
 func (this Cartridge_1) Write(i uint16, d uint8) {
@@ -55,14 +60,14 @@ func (this Cartridge_1) Write(i uint16, d uint8) {
       this.ramEnabled = false
     }
   case i < 0x4000:
-    this.romBank = (this.romBank & 0xe0) | uint16(d & 0x1f)
+    this.romBank = (this.romBank & 0xe0) | uint32(d & 0x1f)
     this.updateRomBankIfZero()
   case i < 0x6000:
     if this.romBanking {
-      this.romBank = (this.romBank & 0x1f) | uint16(d & 0xe0)
+      this.romBank = (this.romBank & 0x1f) | uint32(d & 0xe0)
       this.updateRomBankIfZero()
     } else {
-      this.ramBank = uint16(d & 0x3)
+      this.ramBank = uint32(d & 0x3)
     }
   case i < 0x8000:
     this.romBanking = (d & 0x1 == 0)
@@ -73,14 +78,13 @@ func (this Cartridge_1) Write(i uint16, d uint8) {
     }
   case i >= 0xa000 && i <= 0xbfff:
     if this.ramEnabled {
-      this.ram[(0x2000)*this.ramBank + i - 0xa000] = d
+      this.ram[(0x2000)*this.ramBank + uint32(i - 0xa000)] = d
     }
   }
 }
 
 func (this Cartridge_1) updateRomBankIfZero() {
-  b := this.romBank
-  if b == 0 || b == 0x20 || b == 0x40 || b == 0x60 {
+  if this.romBank == 0 || this.romBank == 0x20 || this.romBank == 0x40 || this.romBank == 0x60 {
     this.romBank++
   }
 }
@@ -107,6 +111,7 @@ func NewCartridge(rom []uint8, mode uint8) Cartridge {
     println()
     return Cartridge_0 {
       rom: rom,
+      ram: make([]uint8, 0x2000),
     }
   case 0x01, 0x02, 0x03:
     print("1")
