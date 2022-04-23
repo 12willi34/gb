@@ -159,7 +159,7 @@ func (this *Gpu) renderTiles() {
     if((val1 & (1 << colour_bit)) > 0) {
       colour |= 1
     }
-    this.buffer[ly][x] = this.getColour(colour, 0xff47)
+    this.buffer[this.line.get()][x] = this.getColour(colour, 0xff47)
   }
 }
 
@@ -186,14 +186,16 @@ func (this *Gpu) getColour(colour uint8, addr uint16) uint8 {
 func (this *Gpu) renderSprites() {
   use8x16 := bool((this.lcdc.get() & (1 << 2)) > 0)
   line := this.line.get()
+  var ySize int = 8
+  if(use8x16) { ySize = 16 }
   for ind := uint16(0); ind < 40; ind++ {
     sprite_ind := uint8(ind*4)
-    yPos := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind)) - 16)
-    var ySize int = 8
-    if(use8x16) { ySize = 16 }
-    xPos := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 1) - 8)
-    if line < yPos || line >= yPos + uint8(ySize) { continue }
+    yPos := this.mu.Read_8(0xfe00 + uint16(sprite_ind)) - 16
+    if line < yPos || line >= (yPos + uint8(ySize)) {
+      continue
+    }
     if yPos == 0 || yPos >= 160 { continue }
+    xPos := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 1) - 8)
     if xPos == 0 || xPos >= 168 { continue }
     tileLocation := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 2))
     attributes := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 3))
@@ -220,6 +222,7 @@ func (this *Gpu) renderSprites() {
         continue
       }
       x := uint8(7 - pixel)
+      if xPos + x >= 160 { continue }
       (*this).buffer[line][xPos + x] = res
     }
   }

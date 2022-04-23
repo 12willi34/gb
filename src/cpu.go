@@ -36,8 +36,8 @@ func NewCPU(mu *memoryunit) cpu {
 }
 
 func (this *cpu) fetch() uint8 {
-  op := (*this.mu).Read_8(this.pc.value)
-  (*this).pc.value += 1
+  op := this.mu.Read_8(this.pc.value)
+  this.pc.value += 1
   return op
 }
 

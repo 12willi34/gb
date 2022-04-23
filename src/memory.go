@@ -16,9 +16,9 @@ func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
   for i := 0; i < 0x100 && i < len(boot); i++ {
     mu.addr[i] = boot[i]
   }
-  cartRom := []uint8 {}
+  cartRom := make([]uint8, len(rom))
   for i := 0; i < len(rom); i++ {
-    cartRom = append(cartRom, uint8(rom[i]))
+    cartRom[i] = uint8(rom[i])
   }
   cart := NewCartridge(cartRom, uint8(rom[0x147]))
   mu.cart = &cart
@@ -30,10 +30,10 @@ func (this *memoryunit) Read_8(i uint16) uint8 {
     return this.addr[i]
   }
   if(i >= 0x0100 && i <= 0x7fff) {
-    return (*this.cart).Read(i)
+    return this.cart.Read(i)
   }
   if(i >= 0xa000 && i <= 0xbfff) {
-    return (*this.cart).Read(i)
+    return this.cart.Read(i)
   }
   if(i >= 0xe000 && i <= 0xfdff) {
 	  return this.Read_8(i - 0x2000)
@@ -49,11 +49,11 @@ func (this *memoryunit) Read_8(i uint16) uint8 {
 
 func (this *memoryunit) Write_8(i uint16, data uint8) {
   if(i < 0x8000) {
-    (*this.cart).Write(i, data)
+    this.cart.Write(i, data)
     return
   }
   if(i >= 0xa000 && i <= 0xbfff) {
-    (*this.cart).Write(i, data)
+    this.cart.Write(i, data)
     return
   }
   if(i < 0xe000) {
@@ -98,7 +98,7 @@ func (this *memoryunit) Write_8(i uint16, data uint8) {
 }
 
 func (this *memoryunit) Read_16(i uint16) uint16 {
-	return uint16((uint16(this.addr[i])) | uint16(this.addr[i + 1]) << 8)
+	return uint16((uint16(this.Read_8(i))) | uint16(this.Read_8(i + 1)) << 8)
 }
 
 func (this *memoryunit) Write_16(i uint16, data uint16) {

@@ -88,8 +88,8 @@ func (this Debugger) showStatus(boot bool) {
   }
 
   fmt.Println(">>>")
-  fmt.Printf("op: %02x\n", this.Mu.addr[this.Cpu.pc.value])
-  fmt.Printf("next op: %02x\n", this.Mu.addr[this.Cpu.pc.value + 1])
+  fmt.Printf("op: %02x\n", this.Mu.Read_8(this.Cpu.pc.value))
+  fmt.Printf("next op: %02x\n", this.Mu.Read_8(this.Cpu.pc.value + 1))
   fmt.Println("i:", this.global_i)
   fmt.Println()
 
