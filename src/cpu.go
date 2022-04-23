@@ -294,6 +294,16 @@ func (this *cpu) shift_left_carry(val uint8) uint8 {
   return res
 }
 
+//SRA
+func (this *cpu) shift_right_carry(val uint8) uint8 {
+  res := (val & 128) | (val >> 1)
+  this.set_f_zero(res == 0)
+  this.set_f_subtr(false)
+  this.set_f_h_carry(false)
+  this.set_f_carry((val & 1) == 1)
+  return res
+}
+
 func (this *cpu) Step() int {
   if((*this).Halt) { return 4 }
   var cycles = -1

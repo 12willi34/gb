@@ -365,6 +365,46 @@ func BIT_1_A(this *cpu) int {
   return 8
 }
 
+func RR_B(this *cpu) int {
+  this.bc.w_high(this.rotate_right(this.bc.r_high()))
+  return 8
+}
+
+func RR_C(this *cpu) int {
+  this.bc.w_low(this.rotate_right(this.bc.r_low()))
+  return 8
+}
+
+func RR_D(this *cpu) int {
+  this.de.w_high(this.rotate_right(this.de.r_high()))
+  return 8
+}
+
+func RR_E(this *cpu) int {
+  this.de.w_low(this.rotate_right(this.de.r_low()))
+  return 8
+}
+
+func RR_H(this *cpu) int {
+  this.hl.w_high(this.rotate_right(this.hl.r_high()))
+  return 8
+}
+
+func RR_L(this *cpu) int {
+  this.hl.w_low(this.rotate_right(this.hl.r_low()))
+  return 8
+}
+
+func RR_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.rotate_right(this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func RR_A(this *cpu) int {
+  this.af.w_high(this.rotate_right(this.af.r_high()))
+  return 8
+}
+
 func RRC_B(this *cpu) int {
   this.bc.w_high(this.rotate_right_carry(this.bc.r_high()))
   return 8
@@ -444,6 +484,46 @@ func RL_H(this *cpu) int {
 func RL_L(this *cpu) int {
   a := this.rotate_left((*this).hl.r_low())
   (*this).hl.w_low(a)
+  return 8
+}
+
+func SRA_B(this *cpu) int {
+  this.bc.w_high(this.shift_right_carry(this.bc.r_high()))
+  return 8
+}
+
+func SRA_C(this *cpu) int {
+  this.bc.w_low(this.shift_right_carry(this.bc.r_low()))
+  return 8
+}
+
+func SRA_D(this *cpu) int {
+  this.de.w_high(this.shift_right_carry(this.de.r_high()))
+  return 8
+}
+
+func SRA_E(this *cpu) int {
+  this.de.w_low(this.shift_right_carry(this.bc.r_low()))
+  return 8
+}
+
+func SRA_H(this *cpu) int {
+  this.hl.w_high(this.shift_right_carry(this.hl.r_high()))
+  return 8
+}
+
+func SRA_L(this *cpu) int {
+  this.hl.w_low(this.shift_right_carry(this.hl.r_low()))
+  return 8
+}
+
+func SRA_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.shift_right_carry(this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SRA_A(this *cpu) int {
+  this.af.w_high(this.shift_right_carry(this.af.r_high()))
   return 8
 }
 
@@ -1107,6 +1187,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return SLA_HL(this)
   case 0x27:
     return SLA_A(this)
+  case 0x28:
+    return SRA_B(this)
+  case 0x29:
+    return SRA_C(this)
+  case 0x2a:
+    return SRA_D(this)
+  case 0x2b:
+    return SRA_E(this)
+  case 0x2c:
+    return SRA_H(this)
+  case 0x2d:
+    return SRA_L(this)
+  case 0x2e:
+    return SRA_HL(this)
+  case 0x2f:
+    return SRA_A(this)
   case 0x30:
     return SWAP_B(this)
   case 0x31:
@@ -1450,44 +1546,4 @@ func (this *cpu) do_cb_op(op uint8) int {
   default:
     return -1
   }
-}
-
-func RR_B(this *cpu) int {
-  this.bc.w_high(this.rotate_right(this.bc.r_high()))
-  return 8
-}
-
-func RR_C(this *cpu) int {
-  this.bc.w_low(this.rotate_right(this.bc.r_low()))
-  return 8
-}
-
-func RR_D(this *cpu) int {
-  this.de.w_high(this.rotate_right(this.de.r_high()))
-  return 8
-}
-
-func RR_E(this *cpu) int {
-  this.de.w_low(this.rotate_right(this.de.r_low()))
-  return 8
-}
-
-func RR_H(this *cpu) int {
-  this.hl.w_high(this.rotate_right(this.hl.r_high()))
-  return 8
-}
-
-func RR_L(this *cpu) int {
-  this.hl.w_low(this.rotate_right(this.hl.r_low()))
-  return 8
-}
-
-func RR_HL(this *cpu) int {
-  this.mu.Write_8(this.hl.value, this.rotate_right(this.mu.Read_8(this.hl.value)))
-  return 16
-}
-
-func RR_A(this *cpu) int {
-  this.af.w_high(this.rotate_right(this.af.r_high()))
-  return 8
 }

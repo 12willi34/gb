@@ -19,9 +19,9 @@ func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
   for i := 0x100; i < 0x4000 && i < len(rom); i++ {
     mu.addr[i] = uint8(rom[i])
   }
-  cartRom := [16384]uint8{}
-  for i := 0x4000; i <= 0x7fff && i < len(rom); i++ {
-    cartRom[i - 0x4000] = uint8(rom[i])
+  cartRom := []uint8 {}
+  for i := 0x4000; i < len(rom); i++ {
+    cartRom = append(cartRom, uint8(rom[i]))
   }
   cart := NewCartridge(cartRom, mu.addr[0x147])
   mu.cart = &cart
@@ -51,6 +51,8 @@ func (this *memoryunit) Write_8(i uint16, data uint8) {
   if(i < 0x8000) {
     (*this.cart).Write(i, data)
     return
+  } else if(i >= 0xa000 && i <= 0xbfff) {
+    (*this.cart).Write(i, data)
   } else if(i < 0xe000) {
 	  this.addr[i] = data
     return
