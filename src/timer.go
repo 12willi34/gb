@@ -62,7 +62,9 @@ func (this *timer) update_tima(cycles int) {
 
 func (this *timer) Timing(cycles int) {
   (*this).update_div(cycles)
+  /*
   if(!this.tac_stopped()) {
     (*this).update_tima(cycles)
   }
+  */
 }
