@@ -77,7 +77,7 @@ func BIT_6_L(this *cpu) int {
 
 func BIT_6_HL(this *cpu) int {
   this.bit(6, this.mu.Read_8(this.hl.value))
-  return 16
+  return 12//16
 }
 
 func BIT_6_A(this *cpu) int {
@@ -117,7 +117,7 @@ func BIT_0_L(this *cpu) int {
 
 func BIT_0_HL(this *cpu) int {
   this.bit(0, this.mu.Read_8(this.hl.value))
-  return 16
+  return 12//16
 }
 
 func BIT_0_A(this *cpu) int {
@@ -282,7 +282,7 @@ func BIT_4_A(this *cpu) int {
 
 func BIT_4_HL(this *cpu) int {
   this.bit(4, this.mu.Read_8(this.hl.value))
-  return 16
+  return 12//16
 }
 
 func BIT_2_B(this *cpu) int {
@@ -322,7 +322,7 @@ func BIT_2_A(this *cpu) int {
 
 func BIT_2_HL(this *cpu) int {
   this.bit(2, this.mu.Read_8(this.hl.value))
-  return 16
+  return 12//16
 }
 
 func BIT_1_B(this *cpu) int {
