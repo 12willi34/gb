@@ -154,22 +154,22 @@ func (this *Gpu) renderTiles() {
 
     colour := uint8(0)
     if((val0 & (1 << colour_bit)) > 0) {
-      colour |= 2
+      colour |= 1
     }
     if((val1 & (1 << colour_bit)) > 0) {
-      colour |= 1
+      colour |= 2
     }
     this.buffer[this.line.get()][x] = this.getColour(colour, 0xff47)
   }
 }
 
 func (this *Gpu) getColour(colour uint8, addr uint16) uint8 {
-  l := 2*colour
-  h := l + 1
+  l := colour << 1
+  h := colour << 1 | 1
   palette := this.mu.Read_8(addr)
   res := uint8(0)
-  if((palette & (1 << h)) > 0) { res += 1 }
-  if((palette & (1 << l)) > 0) { res += 2 }
+  if((palette & (1 << h)) > 0) { res += 2 }
+  if((palette & (1 << l)) > 0) { res += 1 }
   switch(res) {
     case 0:
       return col_white
@@ -213,8 +213,8 @@ func (this *Gpu) renderSprites() {
       colour := pixel
       if(xFlip) { colour = -1*(colour - 7) }
       colourNum := 0
-      if((data2 & (1 << colour)) > 0) { colourNum += 1 }
-      if((data1 & (1 << colour)) > 0) { colourNum += 2 }
+      if((data2 & (1 << colour)) > 0) { colourNum += 2 }
+      if((data1 & (1 << colour)) > 0) { colourNum += 1 }
       colourAddr := 0xff48
       if((attributes & (1 << 4)) > 0) { colourAddr = 0xff49 }
       res := (*this).getColour(uint8(colourNum), uint16(colourAddr))
