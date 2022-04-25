@@ -210,20 +210,24 @@ func (this *Gpu) renderSprites() {
     data1 := this.mu.Read_8(dataAddr)
     data2 := this.mu.Read_8(dataAddr + 1)
     for pixel := 7; pixel >= 0; pixel-- {
+
+      x := uint8(7 - pixel)
+      real_pixel := xPos + x
+      if real_pixel >= 160 { continue }
+
       colour := pixel
       if(xFlip) { colour = -1*(colour - 7) }
       colourNum := 0
       if((data2 & (1 << colour)) > 0) { colourNum += 2 }
       if((data1 & (1 << colour)) > 0) { colourNum += 1 }
+      if colourNum == 0 { continue }
       colourAddr := 0xff48
       if((attributes & (1 << 4)) > 0) { colourAddr = 0xff49 }
       res := (*this).getColour(uint8(colourNum), uint16(colourAddr))
       if(res == col_white) {
         continue
       }
-      x := uint8(7 - pixel)
-      if xPos + x >= 160 { continue }
-      (*this).buffer[line][xPos + x] = res
+      this.buffer[line][real_pixel] = res
     }
   }
 }
