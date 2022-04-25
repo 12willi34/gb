@@ -130,6 +130,7 @@ func (this *Gpu) renderTiles() {
   }
   line := (yPos % 8)*2
   row := uint16(yPos/8)*32
+  pal := this.mu.Read_8(0xff47)
   for x := uint8(0); x < 160; x++ {
     xPos = x + sx
     if(x >= wx && in_window) {
@@ -159,17 +160,16 @@ func (this *Gpu) renderTiles() {
     if((val1 & (1 << colour_bit)) > 0) {
       colour |= 2
     }
-    this.buffer[this.line.get()][x] = this.getColour(colour, 0xff47)
+    this.buffer[this.line.get()][x] = this.getColour(colour, pal)
   }
 }
 
-func (this *Gpu) getColour(colour uint8, addr uint16) uint8 {
+func (this *Gpu) getColour(colour uint8, pal uint8) uint8 {
   l := colour << 1
-  h := colour << 1 | 1
-  palette := this.mu.Read_8(addr)
+  h := l | 1
   res := uint8(0)
-  if((palette & (1 << h)) > 0) { res += 2 }
-  if((palette & (1 << l)) > 0) { res += 1 }
+  if((pal & (1 << h)) > 0) { res += 2 }
+  if((pal & (1 << l)) > 0) { res += 1 }
   switch(res) {
     case 0:
       return col_white
@@ -188,6 +188,8 @@ func (this *Gpu) renderSprites() {
   line := this.line.get()
   var ySize int = 8
   if(use8x16) { ySize = 16 }
+  pal1, pal2 := this.mu.Read_8(0xff48), this.mu.Read_8(0xff49)
+  var pal uint8
   for ind := uint16(0); ind < 40; ind++ {
     sprite_ind := uint8(ind*4)
     yPos := this.mu.Read_8(0xfe00 + uint16(sprite_ind)) - 16
@@ -216,13 +218,9 @@ func (this *Gpu) renderSprites() {
       if((data2 & (1 << colour)) > 0) { colourNum += 2 }
       if((data1 & (1 << colour)) > 0) { colourNum += 1 }
       if colourNum == 0 { continue }
-      colourAddr := 0xff48
-      if((attributes & (1 << 4)) > 0) { colourAddr = 0xff49 }
-      res := (*this).getColour(uint8(colourNum), uint16(colourAddr))
-      if(res == col_white) {
-        continue
-      }
-      this.buffer[line][x] = res
+      pal = pal1
+      if((attributes & (1 << 4)) > 0) { pal = pal2 }
+      this.buffer[line][x] = this.getColour(uint8(colourNum), pal)
     }
   }
 }
