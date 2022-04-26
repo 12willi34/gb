@@ -1232,7 +1232,7 @@ func CCF(this *cpu) int {
 }
 
 func RRA(this *cpu) int {
-  this.af.w_high(this.rotate_right_carry(this.af.r_high()))
+  this.af.w_high(this.rotate_right(this.af.r_high()))
   this.set_f_zero(false)
   return 4
 }
