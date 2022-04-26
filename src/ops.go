@@ -1115,7 +1115,7 @@ func POP_BC(this *cpu) int {
 }
 
 func POP_AF(this *cpu) int {
-  (*this).af.value = this.popStack()
+  (*this).af.value = this.popStack() & ^uint16(0b1111)
   return 12
 }
 
