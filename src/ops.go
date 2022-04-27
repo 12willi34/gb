@@ -1414,6 +1414,7 @@ func LDHL_SP_number(this *cpu) int {
   this.set_f_subtr(false)
   this.set_f_h_carry((res_temp & 0x10) == 0x10)
   this.set_f_carry((res_temp & 0x100) == 0x100)
+  this.hl.value = res
   return 12
 }
 
