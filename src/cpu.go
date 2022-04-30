@@ -171,16 +171,16 @@ func (this *cpu) subtract(a uint8, b uint8) uint8 {
 }
 
 //=SBC
-func (this *cpu) subtract_carry(b uint8, a uint8) uint8 {
-  carry := uint16(0)
-  if((*this).get_f_carry()) {carry = uint16(1)}
-  res := uint16(a) - (uint16(b) + carry)
-  this.set_f_zero(res == 0)
+func (this *cpu) subtract_carry(value uint8, a uint8) uint8 {
+  carry := uint8(0)
+  if((*this).get_f_carry()) {carry = uint8(1)}
+  res := int(a) - int(value) - int(carry)
+  res_small := uint8(res)
+  this.set_f_zero(res_small == 0)
   this.set_f_subtr(true)
-  hc := int16(a & 0x0f) - (int16(b & 0xf) + int16(carry))
-  this.set_f_h_carry(hc < 0)
-  this.set_f_carry(a < b)
-  return uint8(res)
+  this.set_f_h_carry(res < 0)
+  this.set_f_carry(int(a & 0xf) - int(value & 0xf) - int(carry) < 0)
+  return res_small
 }
 
 //=RL

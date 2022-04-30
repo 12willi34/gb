@@ -18,9 +18,10 @@ type Debugger struct {
   Gpu *Gpu
   first_rom_part []byte
   global_i int
+  do_dump bool
 }
 
-func NewDebugger(boot [0x100]byte, rom []byte) Debugger {
+func NewDebugger(boot [0x100]byte, rom []byte, dump bool) Debugger {
   mu := NewMemoryUnit(boot, rom)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
@@ -38,22 +39,24 @@ func NewDebugger(boot [0x100]byte, rom []byte) Debugger {
     Gpu: &gpu,
     first_rom_part: rom[:0x100],
     global_i: 0,
+    do_dump: dump,
   }
 }
 
 func (this Debugger) Init() {
   fmt.Println("starting debugger")
-  this.debug_boot_loop()
+  this.debug_boot_loop(this.do_dump)
   println("boot done")
   this.global_i = 2323814 //wo wird i hier auf 0 gesetzt??
-  this.debug_loop()
+  this.debug_loop(this.do_dump)
 }
 
-func (this Debugger) debug_boot_loop() {
+func (this Debugger) debug_boot_loop(dump bool) {
   for true {
     this.global_i++
-    this.showStatus(true)
-
+    if(!dump) {
+      this.showStatus(true)
+    }
     this.Interrupter.handle()
     steps := this.Cpu.Step()
     if(steps == -1) { return }
@@ -68,16 +71,46 @@ func (this Debugger) debug_boot_loop() {
   }
 }
 
-func (this Debugger) debug_loop() {
+func (this Debugger) debug_loop(dump bool) {
   for true {
     this.global_i++
-    this.showStatus(false)
-
+    if(dump) {
+      this.dump()
+    } else {
+      this.showStatus(false)
+    }
     this.Interrupter.handle()
     steps := this.Cpu.Step()
     if(steps == -1) { return }
     this.Gpu.Step(steps)
     this.Timer.Timing(steps)
+  }
+}
+
+func (this Debugger) dump() {
+  op := this.Mu.Read_8(this.Cpu.pc.value)
+  var dump string
+  if(op == 0xcb) {
+    dump = fmt.Sprintf("op: cb %02x\n", this.Mu.Read_8(this.Cpu.pc.value + 1))
+  } else {
+    dump = fmt.Sprintf("op: %02x\n", this.Mu.Read_8(this.Cpu.pc.value))
+  }
+  dump += fmt.Sprintf("af: %04x\n", this.Cpu.af.value)
+  dump += fmt.Sprintf("bc: %04x\n", this.Cpu.bc.value)
+  dump += fmt.Sprintf("de: %04x\n", this.Cpu.de.value)
+  dump += fmt.Sprintf("hl: %04x\n", this.Cpu.hl.value)
+  dump += fmt.Sprintf("sp: %04x\n", this.Cpu.sp.value)
+  dump += fmt.Sprintf("pc: %04x\n\n", this.Cpu.pc.value)
+  f, err := os.OpenFile("./gb.dump.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+  if(err != nil) {
+    fmt.Println("error opening dumpfile")
+    panic(err)
+  }
+  defer f.Close()
+  _, err = f.WriteString(dump)
+  if(err != nil) {
+    fmt.Println("error writing to dumpfile")
+    panic(err)
   }
 }
 

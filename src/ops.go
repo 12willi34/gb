@@ -295,8 +295,7 @@ func LD_n_A(this *cpu) int {
 }
 
 func LD_A_n(this *cpu) int {
-  a := this.mu.Read_8(0xff00 + uint16(this.fetch()))
-  this.af.w_high(a)
+  this.af.w_high(this.mu.Read_8(0xff00 + uint16(this.fetch())))
   return 12
 }
 
@@ -951,58 +950,42 @@ func SUB_number(this *cpu) int {
 }
 
 func SBC_A_A(this *cpu) int {
-  a := (*this).af.r_high()
-  b := (*this).af.r_high()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.af.r_high(), this.af.r_high()))
   return 4
 }
 
 func SBC_A_B(this *cpu) int {
-  a := (*this).af.r_high()
-  b := (*this).bc.r_high()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.bc.r_high(), this.af.r_high()))
   return 4
 }
 
 func SBC_A_C(this *cpu) int {
-  a := (*this).af.r_high()
-  b := (*this).bc.r_low()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.bc.r_low(), this.af.r_high()))
   return 4
 }
 
 func SBC_A_D(this *cpu) int {
-  a := (*this).af.r_high()
-  b := (*this).de.r_high()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.de.r_high(), this.af.r_high()))
   return 4
 }
 
 func SBC_A_E(this *cpu) int {
-  a := (*this).af.r_high()
-  b := (*this).de.r_low()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.de.r_low(), this.af.r_high()))
   return 4
 }
 
 func SBC_A_H(this *cpu) int {
-  a := (*this).af.r_high()
-  b := (*this).hl.r_high()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.hl.r_high(), this.af.r_high()))
   return 4
 }
 
 func SBC_A_L(this *cpu) int {
-  a := (*this).af.r_high()
-  b := (*this).hl.r_low()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.hl.r_low(), this.af.r_high()))
   return 4
 }
 
 func SBC_A_number(this *cpu) int {
-  a := (*this).af.r_high()
-  b := this.fetch()
-  (*this).af.w_high(this.subtract_carry(a, b))
+  this.af.w_high(this.subtract_carry(this.fetch(), this.af.r_high()))
   return 8
 }
 
