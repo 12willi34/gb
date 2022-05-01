@@ -174,12 +174,13 @@ func (this *cpu) subtract(a uint8, b uint8) uint8 {
 func (this *cpu) subtract_carry(value uint8, a uint8) uint8 {
   carry := uint8(0)
   if((*this).get_f_carry()) {carry = uint8(1)}
-  res := int(a) - int(value) - int(carry)
+  var res int
+  res = int(a) - int(value) - int(carry)
   res_small := uint8(res)
   this.set_f_zero(res_small == 0)
   this.set_f_subtr(true)
-  this.set_f_h_carry(res < 0)
-  this.set_f_carry(int(a & 0xf) - int(value & 0xf) - int(carry) < 0)
+  this.set_f_h_carry(int(a & 0xf) - int(value & 0xf) - int(carry) < 0)
+  this.set_f_carry(res < 0)
   return res_small
 }
 

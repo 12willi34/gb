@@ -132,6 +132,10 @@ func (this Debugger) showStatus(boot bool) {
   fmt.Println("halted:", this.Cpu.Halt)
   fmt.Println()
 
+  fmt.Printf("stack values\n")
+  fmt.Printf("%04x: %02x\n", this.Cpu.sp.value, this.Mu.addr[this.Cpu.sp.value])
+  fmt.Printf("%04x: %02x\n\n", (this.Cpu.sp.value + 1), this.Mu.addr[this.Cpu.sp.value + 1])
+
   fmt.Printf("gpu clock: %d\n", this.Gpu.PubClock)
   fmt.Printf("line: %d\n", this.Mu.addr[0xff44])
   fmt.Printf("gpu mode: %d\n", this.Gpu.PubMode)
