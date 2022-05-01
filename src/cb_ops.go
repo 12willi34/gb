@@ -445,6 +445,11 @@ func RRC_A(this *cpu) int {
   return 8
 }
 
+func RL_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.rotate_left(this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
 func RL_A(this *cpu) int {
   a := this.rotate_left((*this).af.r_high())
   (*this).af.w_high(a)
@@ -1817,9 +1822,4 @@ func (this *cpu) do_cb_op(op uint8) int {
   default:
     return -1
   }
-}
-
-func RL_HL(this *cpu) int {
-  this.mu.Write_8(this.hl.value, this.rotate_left(this.mu.Read_8(this.hl.value)))
-  return 16
 }
