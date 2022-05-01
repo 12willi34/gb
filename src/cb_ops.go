@@ -503,7 +503,7 @@ func SRA_D(this *cpu) int {
 }
 
 func SRA_E(this *cpu) int {
-  this.de.w_low(this.shift_right_carry(this.bc.r_low()))
+  this.de.w_low(this.shift_right_carry(this.de.r_low()))
   return 8
 }
 
