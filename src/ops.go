@@ -992,7 +992,7 @@ func SBC_A_number(this *cpu) int {
 func SBC_A_HL(this *cpu) int {
   a := (*this).af.r_high()
   b := (*this).mu.Read_8((*this).hl.value)
-  (*this).af.w_high(this.subtract_carry(a, b))
+  (*this).af.w_high(this.subtract_carry(b, a))
   return 8
 }
 

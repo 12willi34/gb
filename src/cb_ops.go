@@ -1346,6 +1346,8 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RL_H(this)
   case 0x15:
     return RL_L(this)
+  case 0x16:
+    return RL_HL(this)
   case 0x17:
     return RL_A(this)
   case 0x18:
@@ -1815,4 +1817,9 @@ func (this *cpu) do_cb_op(op uint8) int {
   default:
     return -1
   }
+}
+
+func RL_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.rotate_left(this.mu.Read_8(this.hl.value)))
+  return 16
 }
