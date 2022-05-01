@@ -569,6 +569,119 @@ func SRL_HL(this *cpu) int {
   return 16
 }
 
+func RES_6_B(this *cpu) int {
+  this.bc.w_high(this.res(6, this.bc.r_high()))
+  return 8
+}
+
+func RES_6_C(this *cpu) int {
+  this.bc.w_low(this.res(6, this.bc.r_low()))
+  return 8
+}
+
+func RES_6_D(this *cpu) int {
+  this.de.w_high(this.res(6, this.de.r_high()))
+  return 8
+}
+
+func RES_6_E(this *cpu) int {
+  this.de.w_low(this.res(6, this.de.r_low()))
+  return 8
+}
+
+func RES_6_H(this *cpu) int {
+  this.hl.w_high(this.res(6, this.hl.r_high()))
+  return 8
+}
+
+func RES_6_L(this *cpu) int {
+  this.hl.w_low(this.res(6, this.hl.r_low()))
+  return 8
+}
+
+func RES_6_HL(this *cpu) int {
+  hl := this.mu.Read_8(this.hl.value)
+  this.mu.Write_8(this.hl.value, this.res(6, hl))
+  return 16
+}
+
+func RES_6_A(this *cpu) int {
+  this.af.w_high(this.res(6, this.af.r_high()))
+  return 8
+}
+
+
+func RES_4_B(this *cpu) int {
+  this.bc.w_high(this.res(4, this.bc.r_high()))
+  return 8
+}
+
+func RES_4_C(this *cpu) int {
+  this.bc.w_low(this.res(4, this.bc.r_low()))
+  return 8
+}
+
+func RES_4_D(this *cpu) int {
+  this.de.w_high(this.res(4, this.de.r_high()))
+  return 8
+}
+
+func RES_4_E(this *cpu) int {
+  this.de.w_low(this.res(4, this.de.r_low()))
+  return 8
+}
+
+func RES_4_H(this *cpu) int {
+  this.hl.w_high(this.res(4, this.hl.r_high()))
+  return 8
+}
+
+func RES_4_L(this *cpu) int {
+  this.hl.w_low(this.res(4, this.hl.r_low()))
+  return 8
+}
+
+func RES_4_HL(this *cpu) int {
+  hl := this.mu.Read_8(this.hl.value)
+  this.mu.Write_8(this.hl.value, this.res(4, hl))
+  return 16
+}
+
+func RES_4_A(this *cpu) int {
+  this.af.w_high(this.res(4, this.af.r_high()))
+  return 8
+}
+
+func RES_0_B(this *cpu) int {
+  this.bc.w_high(this.res(0, this.bc.r_high()))
+  return 8
+}
+
+func RES_0_C(this *cpu) int {
+  this.bc.w_low(this.res(0, this.bc.r_low()))
+  return 8
+}
+
+func RES_0_D(this *cpu) int {
+  this.de.w_high(this.res(0, this.de.r_high()))
+  return 8
+}
+
+func RES_0_E(this *cpu) int {
+  this.de.w_low(this.res(0, this.de.r_low()))
+  return 8
+}
+
+func RES_0_H(this *cpu) int {
+  this.hl.w_high(this.res(0, this.hl.r_high()))
+  return 8
+}
+
+func RES_0_L(this *cpu) int {
+  this.hl.w_low(this.res(0, this.hl.r_low()))
+  return 8
+}
+
 func RES_3_B(this *cpu) int {
   this.bc.w_high(this.res(3, this.bc.r_high()))
   return 8
@@ -823,6 +936,86 @@ func RLC_HL(this *cpu) int {
 
 func RLC_A(this *cpu) int {
   this.af.w_high(this.rlc(this.af.r_high()))
+  return 8
+}
+
+func SET_4_B(this *cpu) int {
+  this.bc.w_high(this.set(4, this.bc.r_high()))
+  return 8
+}
+
+func SET_4_C(this *cpu) int {
+  this.bc.w_low(this.set(4, this.bc.r_low()))
+  return 8
+}
+
+func SET_4_D(this *cpu) int {
+  this.de.w_high(this.set(4, this.de.r_high()))
+  return 8
+}
+
+func SET_4_E(this *cpu) int {
+  this.de.w_low(this.set(4, this.de.r_low()))
+  return 8
+}
+
+func SET_4_H(this *cpu) int {
+  this.hl.w_high(this.set(4, this.hl.r_high()))
+  return 8
+}
+
+func SET_4_L(this *cpu) int {
+  this.hl.w_low(this.set(4, this.hl.r_low()))
+  return 8
+}
+
+func SET_4_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.set(4, this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_4_A(this *cpu) int {
+  this.af.w_high(this.set(4, this.af.r_high()))
+  return 8
+}
+
+func SET_6_B(this *cpu) int {
+  this.bc.w_high(this.set(6, this.bc.r_high()))
+  return 8
+}
+
+func SET_6_C(this *cpu) int {
+  this.bc.w_low(this.set(6, this.bc.r_low()))
+  return 8
+}
+
+func SET_6_D(this *cpu) int {
+  this.de.w_high(this.set(6, this.de.r_high()))
+  return 8
+}
+
+func SET_6_E(this *cpu) int {
+  this.de.w_low(this.set(6, this.de.r_low()))
+  return 8
+}
+
+func SET_6_H(this *cpu) int {
+  this.hl.w_high(this.set(6, this.hl.r_high()))
+  return 8
+}
+
+func SET_6_L(this *cpu) int {
+  this.hl.w_low(this.set(6, this.hl.r_low()))
+  return 8
+}
+
+func SET_6_HL(this *cpu) int {
+  this.mu.Write_8(this.hl.value, this.set(6, this.mu.Read_8(this.hl.value)))
+  return 16
+}
+
+func SET_6_A(this *cpu) int {
+  this.af.w_high(this.set(6, this.af.r_high()))
   return 8
 }
 
@@ -1363,6 +1556,18 @@ func (this *cpu) do_cb_op(op uint8) int {
     return BIT_7_HL(this)
   case 0x7f:
     return BIT_7_A(this)
+  case 0x80:
+    return RES_0_B(this)
+  case 0x81:
+    return RES_0_C(this)
+  case 0x82:
+    return RES_0_D(this)
+  case 0x83:
+    return RES_0_E(this)
+  case 0x84:
+    return RES_0_H(this)
+  case 0x85:
+    return RES_0_L(this)
   case 0x86:
     return RES_0_HL(this)
   case 0x87:
@@ -1415,6 +1620,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RES_3_HL(this)
   case 0x9f:
     return RES_3_A(this)
+  case 0xa0:
+    return RES_4_B(this)
+  case 0xa1:
+    return RES_4_C(this)
+  case 0xa2:
+    return RES_4_D(this)
+  case 0xa3:
+    return RES_4_E(this)
+  case 0xa4:
+    return RES_4_H(this)
+  case 0xa5:
+    return RES_4_L(this)
+  case 0xa6:
+    return RES_4_HL(this)
+  case 0xa7:
+    return RES_4_A(this)
   case 0xa8:
     return RES_5_B(this)
   case 0xa9:
@@ -1431,6 +1652,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return RES_5_HL(this)
   case 0xaf:
     return RES_5_A(this)
+  case 0xb0:
+    return RES_6_B(this)
+  case 0xb1:
+    return RES_6_C(this)
+  case 0xb2:
+    return RES_6_D(this)
+  case 0xb3:
+    return RES_6_E(this)
+  case 0xb4:
+    return RES_6_H(this)
+  case 0xb5:
+    return RES_6_L(this)
+  case 0xb6:
+    return RES_6_HL(this)
+  case 0xb7:
+    return RES_6_A(this)
   case 0xb8:
     return RES_7_B(this)
   case 0xb9:
@@ -1511,6 +1748,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return SET_3_HL(this)
   case 0xdf:
     return SET_3_A(this)
+  case 0xe0:
+    return SET_4_B(this)
+  case 0xe1:
+    return SET_4_C(this)
+  case 0xe2:
+    return SET_4_D(this)
+  case 0xe3:
+    return SET_4_E(this)
+  case 0xe4:
+    return SET_4_H(this)
+  case 0xe5:
+    return SET_4_L(this)
+  case 0xe6:
+    return SET_4_HL(this)
+  case 0xe7:
+    return SET_4_A(this)
   case 0xe8:
     return SET_5_B(this)
   case 0xe9:
@@ -1527,6 +1780,22 @@ func (this *cpu) do_cb_op(op uint8) int {
     return SET_5_HL(this)
   case 0xef:
     return SET_5_A(this)
+  case 0xf0:
+    return SET_6_B(this)
+  case 0xf1:
+    return SET_6_C(this)
+  case 0xf2:
+    return SET_6_D(this)
+  case 0xf3:
+    return SET_6_E(this)
+  case 0xf4:
+    return SET_6_H(this)
+  case 0xf5:
+    return SET_6_L(this)
+  case 0xf6:
+    return SET_6_HL(this)
+  case 0xf7:
+    return SET_6_A(this)
   case 0xf8:
     return SET_7_B(this)
   case 0xf9:
