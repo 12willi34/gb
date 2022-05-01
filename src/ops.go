@@ -1871,7 +1871,7 @@ func (this *cpu) do_op(op uint8) int {
   case 0xd3:
     return NOOP(this)
   case 0xd4:
-    return CALL_C_number(this)
+    return CALL_NC_number(this)
   case 0xd5:
     return PUSH_DE(this)
   case 0xd6:
