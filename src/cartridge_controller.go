@@ -14,6 +14,10 @@ type Cartridge struct {
   ram []byte
   ramBank uint32
   ramEnabled bool
+
+  rtc []uint8
+  latchedRtc []uint8
+  latched bool
 }
 
 func NewCartridge(rom []uint8, mode uint8) Cartridge {
@@ -31,10 +35,23 @@ func NewCartridge(rom []uint8, mode uint8) Cartridge {
       romBank: 1,
       ram: make([]uint8, 0x8000),
     }
+  /*
   case 0x04, 0x05, 0x06:
     return Cartridge {
       mode: 2,
       rom: rom,
+      romBank: 1,
+      ram: make([]uint8, 0x2000),
+    }
+  */
+  case 0xf, 0x10, 0x11, 0x12, 0x13:
+    return Cartridge {
+      mode: 3,
+      rom: rom,
+      romBank: 1,
+      ram: make([]uint8, 0x8000),
+      rtc: make([]uint8, 0x10),
+      latchedRtc: make([]uint8, 0x10),
     }
   default:
     fmt.Println("cartridge mode not supported:", mode)
@@ -51,8 +68,12 @@ func (this *Cartridge) Read(i uint16) uint8 {
     return this.Read_mode0(i)
   case 1:
     return this.Read_mode1(i)
+  /*
   case 2:
     return this.Read_mode2(i)
+  */
+  case 3:
+    return this.Read_mode3(i)
   default:
     return 0
   }
@@ -64,8 +85,12 @@ func (this *Cartridge) Write(i uint16, d uint8) {
     this.Write_mode0(i, d)
   case 1:
     this.Write_mode1(i, d)
+  /*
   case 2:
     this.Write_mode2(i, d)
+  */
+  case 3:
+    this.Write_mode3(i, d)
   }
 }
 
@@ -135,12 +160,46 @@ func (this *Cartridge) updateRomBankIfZero() {
   }
 }
 
-//mode 2
+//mode 3
 
-func (this *Cartridge) Read_mode2(i uint16) uint8 {
-  return this.rom[i - 0x4000]
+func (this *Cartridge) Read_mode3(i uint16) uint8 {
+  if(i < 0x4000) {
+    return this.rom[i]
+  }
+  if(i < 0x8000) {
+    return this.rom[uint32(i) + (this.romBank - 1)*0x4000]
+  }
+  if(this.ramBank >= 0x4) {
+    if(this.latched) {
+      return this.latchedRtc[this.ramBank]
+    }
+    return this.rtc[this.ramBank]
+  }
+  return this.ram[this.ramBank*0x2000 + uint32(i - 0xa000)]
 }
 
-func (this *Cartridge) Write_mode2(i uint16, d uint8) {
-  return
+func (this *Cartridge) Write_mode3(i uint16, d uint8) {
+  switch {
+  case i < 0x2000:
+    this.ramEnabled = d & 0xa != 0
+  case i < 0x4000:
+    this.romBank = uint32(d & 0x7f)
+    if(this.romBank == 0) { this.romBank++ }
+  case i < 0x6000:
+    this.ramBank = uint32(d)
+  case i < 0x8000:
+    if(d == 1) {
+      this.latched = false
+    } else if(d == 0) {
+      this.latched = true
+      copy(this.rtc, this.latchedRtc)
+    }
+  case i >= 0xa000 && i <= 0xbfff:
+    if(!this.ramEnabled) { return }
+    if(this.ramBank >= 0x4) {
+      this.rtc[this.ramBank] = d
+    } else {
+      this.ram[this.ramBank*0x2000 + uint32(i - 0xa000)] = d
+    }
+  }
 }
