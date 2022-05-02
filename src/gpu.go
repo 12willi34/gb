@@ -160,7 +160,7 @@ func (this *Gpu) renderTiles() {
     if((val1 & (1 << colour_bit)) > 0) {
       colour |= 2
     }
-    this.buffer[this.line.get()][x] = this.getColour(colour, pal)
+    this.buffer[ly][x] = this.getColour(colour, pal)
   }
 }
 
@@ -201,6 +201,7 @@ func (this *Gpu) renderSprites() {
     attributes := uint8((*(*this).mu).Read_8(0xfe00 + uint16(sprite_ind) + 3))
     yFlip := (attributes & (1 << 6)) > 0
     xFlip := (attributes & (1 << 5)) > 0
+    behindBg := 0 < attributes & (1 << 7)
     l := int(line - yPos)
     if(yFlip) {
       l = -1*(l - int(ySize))
@@ -220,6 +221,7 @@ func (this *Gpu) renderSprites() {
       if colourNum == 0 { continue }
       pal = pal1
       if((attributes & (1 << 4)) > 0) { pal = pal2 }
+      if(behindBg && this.buffer[line][x] != col_white) { continue }
       this.buffer[line][x] = this.getColour(uint8(colourNum), pal)
     }
   }
