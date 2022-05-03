@@ -1,6 +1,8 @@
 package gb
 
 import "fmt"
+import "os"
+import "time"
 
 //todo: polymorphism
 
@@ -45,7 +47,7 @@ func NewCartridge(rom []uint8, mode uint8) Cartridge {
     }
   */
   case 0xf, 0x10, 0x11, 0x12, 0x13:
-    return Cartridge {
+    cart := Cartridge {
       mode: 3,
       rom: rom,
       romBank: 1,
@@ -53,6 +55,15 @@ func NewCartridge(rom []uint8, mode uint8) Cartridge {
       rtc: make([]uint8, 0x10),
       latchedRtc: make([]uint8, 0x10),
     }
+
+    //todo
+    cart.Load()
+    ticker := time.NewTicker(time.Second)
+    go func() {
+      for range ticker.C { cart.Save() }
+    }()
+
+    return cart
   default:
     fmt.Println("cartridge mode not supported:", mode)
     return Cartridge {
@@ -201,5 +212,27 @@ func (this *Cartridge) Write_mode3(i uint16, d uint8) {
     } else {
       this.ram[this.ramBank*0x2000 + uint32(i - 0xa000)] = d
     }
+  }
+}
+
+//todo: allgemein machen
+func (this *Cartridge) Save() {
+  data := make([]byte, len(this.ram))
+  for i := 0; i < len(this.ram); i++ {
+    data[i] = byte(this.ram[i])
+  }
+  f, err := os.OpenFile("dump.data", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+  if(err != nil) { panic(err) }
+  defer f.Close()
+  _, err = f.Write(data)
+  if(err != nil) { panic(err) }
+}
+
+func (this *Cartridge) Load() {
+  ram, err := os.ReadFile("dump.data")
+  if(err != nil) {
+    println("no data")
+  } else {
+    this.ram = ram
   }
 }
