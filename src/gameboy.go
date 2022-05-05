@@ -142,7 +142,7 @@ func (this *GameBoy) sdl_loop() bool {
     this.r.Present()
     took := time.Now().UnixMilli() - this.last_vblank
     if took < vblank_duration {
-      sdl.Delay(uint32(vblank_duration - took))
+      sdl.Delay(uint32(vblank_duration - took - 1))
     }
     this.last_vblank = time.Now().UnixMilli()
     this.Gpu.vblank = false
