@@ -1,6 +1,5 @@
 package gb
 
-import "fmt"
 import "os"
 import "time"
 
@@ -22,55 +21,76 @@ type Cartridge struct {
   latched bool
 }
 
-func NewCartridge(rom []uint8, mode uint8) Cartridge {
-  switch mode {
-  case 0x00, 0x08, 0x09, 0x0b, 0x0c, 0x0d:
-    return Cartridge {
-      mode: 0,
-      rom: rom,
-      ram: make([]uint8, 0x2000),
-    }
-  case 0x01, 0x02, 0x03:
-    return Cartridge {
-      mode: 1,
-      rom: rom,
-      romBank: 1,
-      ram: make([]uint8, 0x8000),
-    }
+func NewCartridge(game string) (Cartridge, []byte) {
+  cartBytes, err := os.ReadFile(game)
+  if(err != nil) { panic(err) }
+  rom := make([]uint8, len(cartBytes))
+  for i := 0; i < len(cartBytes); i++ {
+    rom[i] = uint8(cartBytes[i])
+  }
+  var mode int
+  battery := false
+  switch rom[0x147] {
+  case 0x00, 0x08, 0x0b, 0x0c:
+    mode = 0
+  case 0x09, 0x0d:
+    mode = 0
+    battery = true
+  case 0x01, 0x02:
+    mode = 1
+  case 0x03:
+    mode = 1
+    battery = true
   /*
-  case 0x04, 0x05, 0x06:
-    return Cartridge {
-      mode: 2,
-      rom: rom,
-      romBank: 1,
-      ram: make([]uint8, 0x2000),
-    }
+  case 0x05:
+    mode = 2
+  case 0x06:
+    mode = 2
+    battery = true
   */
-  case 0xf, 0x10, 0x11, 0x12, 0x13:
-    cart := Cartridge {
-      mode: 3,
-      rom: rom,
-      romBank: 1,
-      ram: make([]uint8, 0x8000),
-      rtc: make([]uint8, 0x10),
-      latchedRtc: make([]uint8, 0x10),
-    }
-
-    //todo
-    cart.Load()
+  case 0x11, 0x12:
+    mode = 3
+  case 0xf, 0x10, 0x13:
+    mode = 3
+    battery = true
+  default:
+    mode = 0
+  }
+  var cart Cartridge
+  switch mode {
+    case 0:
+      cart = Cartridge {
+        mode: 0,
+        rom: rom,
+        ram: make([]uint8, 0x2000),
+      }
+    case 2:
+      //todo
+    case 1:
+      cart = Cartridge {
+        mode: 1,
+        rom: rom,
+        romBank: 1,
+        ram: make([]uint8, 0x8000),
+      }
+    case 3:
+      cart = Cartridge {
+        mode: 3,
+        rom: rom,
+        romBank: 1,
+        ram: make([]uint8, 0x8000),
+        rtc: make([]uint8, 0x10),
+        latchedRtc: make([]uint8, 0x10),
+      }
+  }
+  if(battery) {
+    cart.Load(game)
     ticker := time.NewTicker(time.Second)
     go func() {
-      for range ticker.C { cart.Save() }
+      for range ticker.C { cart.Save(game) }
     }()
-
-    return cart
-  default:
-    fmt.Println("cartridge mode not supported:", mode)
-    return Cartridge {
-      mode: 0,
-      rom: rom,
-    }
   }
+  return cart, cartBytes[:256]
 }
 
 func (this *Cartridge) Read(i uint16) uint8 {
@@ -215,23 +235,22 @@ func (this *Cartridge) Write_mode3(i uint16, d uint8) {
   }
 }
 
-//todo: allgemein machen
-func (this *Cartridge) Save() {
+func (this *Cartridge) Save(filename string) {
   data := make([]byte, len(this.ram))
   for i := 0; i < len(this.ram); i++ {
     data[i] = byte(this.ram[i])
   }
-  f, err := os.OpenFile("dump.data", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+  f, err := os.OpenFile(filename + ".dump", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
   if(err != nil) { panic(err) }
   defer f.Close()
   _, err = f.Write(data)
   if(err != nil) { panic(err) }
 }
 
-func (this *Cartridge) Load() {
-  ram, err := os.ReadFile("dump.data")
+func (this *Cartridge) Load(filename string) {
+  ram, err := os.ReadFile(filename + ".dump")
   if(err != nil) {
-    println("no data")
+    println("no data loaded")
   } else {
     this.ram = ram
   }

@@ -7,22 +7,18 @@ type memoryunit struct {
   cart *Cartridge
 }
 
-func NewMemoryUnit(boot [256]byte, rom []byte) memoryunit {
+func NewMemoryUnit(boot [256]byte, game string) (memoryunit, []byte) {
   io := NewIoController()
+  cart, first_rom_part := NewCartridge(game)
 	mu := memoryunit {
 		addr: make([]uint8, 0x10000),
     Io: &io,
+    cart: &cart,
 	}
   for i := 0; i < 0x100 && i < len(boot); i++ {
     mu.addr[i] = boot[i]
   }
-  cartRom := make([]uint8, len(rom))
-  for i := 0; i < len(rom); i++ {
-    cartRom[i] = uint8(rom[i])
-  }
-  cart := NewCartridge(cartRom, uint8(rom[0x147]))
-  mu.cart = &cart
-  return mu
+  return mu, first_rom_part
 }
 
 func (this *memoryunit) Read_8(i uint16) uint8 {

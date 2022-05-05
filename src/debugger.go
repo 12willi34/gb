@@ -21,8 +21,8 @@ type Debugger struct {
   do_dump bool
 }
 
-func NewDebugger(boot [0x100]byte, rom []byte, dump bool) Debugger {
-  mu := NewMemoryUnit(boot, rom)
+func NewDebugger(boot [256]byte, game string, dump bool) Debugger {
+  mu, first_rom_part := NewMemoryUnit(boot, game)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
   cpu_pointer := &cpu
@@ -37,7 +37,7 @@ func NewDebugger(boot [0x100]byte, rom []byte, dump bool) Debugger {
     Timer: &timer,
     Interrupter: interrupter_pointer,
     Gpu: &gpu,
-    first_rom_part: rom[:0x100],
+    first_rom_part: first_rom_part,
     global_i: 0,
     do_dump: dump,
   }

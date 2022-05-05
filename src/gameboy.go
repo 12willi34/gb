@@ -26,8 +26,8 @@ type GameBoy struct {
   Debug_mode bool
 }
 
-func NewGameBoy(boot [256]byte, rom []byte) GameBoy {
-  mu := NewMemoryUnit(boot, rom)
+func NewGameBoy(boot [256]byte, game string) GameBoy {
+  mu, first_rom_part := NewMemoryUnit(boot, game)
   mu_pointer := &mu
   cpu := NewCPU(mu_pointer)
   cpu_pointer := &cpu
@@ -42,7 +42,7 @@ func NewGameBoy(boot [256]byte, rom []byte) GameBoy {
     Timer: &timer,
     Interrupter: interrupter_pointer,
     Gpu: &gpu,
-    first_rom_part: rom[:0x100],
+    first_rom_part: first_rom_part,
     last_vblank: 0,
   }
 }
@@ -74,9 +74,7 @@ func (this *GameBoy) Init() {
   this.t = texture
   defer texture.Destroy()
 
-  timeBeforeBoot := time.Now().UnixMilli()
   this.boot_loop()
-  fmt.Printf("boot done (%dms)\n", time.Now().UnixMilli() - timeBeforeBoot)
   this.loop()
 }
 
