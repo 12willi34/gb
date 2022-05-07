@@ -6,7 +6,6 @@ type cpu struct {
   mu *memoryunit
 
   EnInterrupt bool
-  DisInterrupt bool
   Interrupt bool
 
   Halt bool
@@ -22,7 +21,6 @@ func NewCPU(mu *memoryunit) cpu {
   res := cpu {
     mu: mu,
     EnInterrupt: false,
-    DisInterrupt: false,
     Interrupt: false,
     Halt: false,
     af: Register {value: 0x0000,},
@@ -306,7 +304,7 @@ func (this *cpu) shift_right_carry(val uint8) uint8 {
 }
 
 func (this *cpu) Step() int {
-  if((*this).Halt) { return 4 }
+  if this.Halt { return 4 }
   var cycles = -1
   var cb_op uint8
   op := this.fetch()

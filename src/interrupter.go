@@ -32,16 +32,11 @@ func (this *interrupter) handle() {
     this.processor.Interrupt = true
     return
   }
-  if(this.processor.DisInterrupt) {
-    this.processor.DisInterrupt = false
-    this.processor.Interrupt = false
-    return
-  }
   if(this.processor.Interrupt) {
     flag := this.mu.Read_8(flag_register)
     enable := this.mu.Read_8(enable_register)
     x := flag & enable
-    if x == 0 { return }
+    if(x == 0) { return }
     this.processor.Halt = false
     this.processor.Interrupt = false
     for i := 0; i < 5; i++ {

@@ -748,7 +748,7 @@ func EI(this *cpu) int {
 }
 
 func DI(this *cpu) int {
-  this.DisInterrupt = true
+  this.Interrupt = false
   return 4
 }
 
@@ -1203,7 +1203,7 @@ func CP_A_L(this *cpu) int {
 
 func RETI(this *cpu) int {
   (*this).pc.value = this.popStack()
-  (*this).Interrupt = true
+  (*this).EnInterrupt = true
   return 16
 }
 

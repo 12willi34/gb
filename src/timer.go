@@ -1,9 +1,5 @@
 package gb
 
-import (
-  //"fmt"
-)
-
 const div = 0xff04
 const tima = 0xff05
 const tma = 0xff06
@@ -31,7 +27,7 @@ func (this *timer) tac_stopped() bool {
 }
 
 func (this *timer) tac_freq() int {
-  return frequencies[2 & (*this).bus.Read_8(tac)]
+  return frequencies[3 & this.bus.Read_8(tac)]
 }
 
 func (this *timer) timer_interrupt() {
@@ -52,19 +48,17 @@ func (this *timer) update_tima(cycles int) {
     (*this).tima_internal -= this.tac_freq()
     t := (*this).bus.Read_8(tima)
     if(t == 0xff) {
-      (*this).bus.addr[tima] = (*this).bus.Read_8(tma)
-      (*this).timer_interrupt()
+      this.bus.Write_8(tima, this.bus.Read_8(tma))
+      this.timer_interrupt()
     } else {
-      (*this).bus.addr[tima] = t + 1
+      this.bus.Write_8(tima, t + 1)
     }
   }
 }
 
 func (this *timer) Timing(cycles int) {
   (*this).update_div(cycles)
-  /*
   if(!this.tac_stopped()) {
     (*this).update_tima(cycles)
   }
-  */
 }
