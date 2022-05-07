@@ -22,8 +22,8 @@ type Gpu struct {
   PubMode int
   mode uint8
 
-  buffer [height][width]uint8
-  vblank bool
+  Buffer [height][width]uint8
+  Vblank bool
 
   //registers
   line Line
@@ -46,8 +46,8 @@ func NewGpu(mu *memoryunit, interrupter *interrupter) Gpu {
     PubMode: int(oam_mode),
     mode: oam_mode,
 
-    buffer: [height][width]uint8{},
-    vblank: false,
+    Buffer: [height][width]uint8{},
+    Vblank: false,
 
     //registers
     lcdc: NewLcdc(mu),
@@ -64,9 +64,9 @@ func NewGpu(mu *memoryunit, interrupter *interrupter) Gpu {
 }
 
 func (this *Gpu) clearScreen() {
-  for i := 0; i < len((*this).buffer); i++ {
-    for j := 0; j < len((*this).buffer[0]); j++ {
-      (*this).buffer[i][j] = col_white
+  for i := 0; i < len((*this).Buffer); i++ {
+    for j := 0; j < len((*this).Buffer[0]); j++ {
+      (*this).Buffer[i][j] = col_white
     }
   }
 }
@@ -160,7 +160,7 @@ func (this *Gpu) renderTiles() {
     if((val1 & (1 << colour_bit)) > 0) {
       colour |= 2
     }
-    this.buffer[ly][x] = this.getColour(colour, pal)
+    this.Buffer[ly][x] = this.getColour(colour, pal)
   }
 }
 
@@ -221,8 +221,8 @@ func (this *Gpu) renderSprites() {
       if colourNum == 0 { continue }
       pal = pal1
       if((attributes & (1 << 4)) > 0) { pal = pal2 }
-      if(behindBg && this.buffer[line][x] != col_white) { continue }
-      this.buffer[line][x] = this.getColour(uint8(colourNum), pal)
+      if(behindBg && this.Buffer[line][x] != col_white) { continue }
+      this.Buffer[line][x] = this.getColour(uint8(colourNum), pal)
     }
   }
 }
@@ -254,7 +254,7 @@ func (this *Gpu) Step(cycles int) {
         if(line == 154) {
           this.setMode(oam_mode)
           (*this).line.set(0)
-          (*this).vblank = true
+          (*this).Vblank = true
         }
       }
     case oam_mode: //= 2
