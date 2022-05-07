@@ -41,19 +41,18 @@ func NewCartridge(game string) (Cartridge, []byte) {
   case 0x03:
     mode = 1
     battery = true
-  /*
   case 0x05:
     mode = 2
   case 0x06:
     mode = 2
     battery = true
-  */
   case 0x11, 0x12:
     mode = 3
   case 0xf, 0x10, 0x13:
     mode = 3
     battery = true
   default:
+    println("cartridge not supported")
     mode = 0
   }
   var cart Cartridge
@@ -65,7 +64,12 @@ func NewCartridge(game string) (Cartridge, []byte) {
         ram: make([]uint8, 0x2000),
       }
     case 2:
-      //todo
+      cart = Cartridge {
+        mode: 2,
+        rom: rom,
+        romBank: 1,
+        ram: make([]uint8, 0x2000),
+      }
     case 1:
       cart = Cartridge {
         mode: 1,
@@ -99,10 +103,8 @@ func (this *Cartridge) Read(i uint16) uint8 {
     return this.Read_mode0(i)
   case 1:
     return this.Read_mode1(i)
-  /*
   case 2:
     return this.Read_mode2(i)
-  */
   case 3:
     return this.Read_mode3(i)
   default:
@@ -116,10 +118,8 @@ func (this *Cartridge) Write(i uint16, d uint8) {
     this.Write_mode0(i, d)
   case 1:
     this.Write_mode1(i, d)
-  /*
   case 2:
     this.Write_mode2(i, d)
-  */
   case 3:
     this.Write_mode3(i, d)
   }
@@ -188,6 +188,39 @@ func (this *Cartridge) Write_mode1(i uint16, d uint8) {
 func (this *Cartridge) updateRomBankIfZero() {
   if this.romBank == 0 || this.romBank == 0x20 || this.romBank == 0x40 || this.romBank == 0x60 {
     this.romBank++
+  }
+}
+
+//mode 2
+
+func (this *Cartridge) Read_mode2(i uint16) uint8 {
+  if(i < 0x4000) {
+    return this.rom[i]
+  }
+  if(i < 0x8000) {
+    return this.rom[uint32(i) + (this.romBank - 1)*0x4000]
+  }
+  return this.ram[i - 0xa000]
+}
+
+func (this *Cartridge) Write_mode2(i uint16, d uint8) {
+  switch {
+  case i < 0x2000:
+    if i & 0x100 == 0 {
+      if d & 0xf == 0xa {
+        this.ramEnabled = true
+      } else if d & 0xf == 0 {
+        this.ramEnabled = false
+      }
+    }
+  case i < 0x4000:
+    if i & 0x100 != 0x100 { return }
+    this.romBank = uint32(d & 0xf)
+    this.updateRomBankIfZero()
+  case i >= 0xa000 && i <= 0xbfff:
+    if this.ramEnabled {
+      this.ram[i - 0xa000] = d & 0xf
+    }
   }
 }
 
