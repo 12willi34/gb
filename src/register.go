@@ -1,8 +1,6 @@
 package gb
 
-import (
-  "math"
-)
+import "math"
 
 type Register struct {
   value uint16

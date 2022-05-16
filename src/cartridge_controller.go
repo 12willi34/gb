@@ -3,8 +3,6 @@ package gb
 import "os"
 import "time"
 
-//todo: polymorphism
-
 type Cartridge struct {
   mode int
 
@@ -282,9 +280,7 @@ func (this *Cartridge) Save(filename string) {
 
 func (this *Cartridge) Load(filename string) {
   ram, err := os.ReadFile(filename + ".dump")
-  if(err != nil) {
-    println("no data loaded")
-  } else {
+  if(err == nil) {
     this.ram = ram
   }
 }

@@ -13,8 +13,8 @@ type cpu struct {
   bc Register
   de Register
   hl Register
-  sp Register //stack pointer
-  pc Register //program counter
+  sp Register
+  pc Register
 }
 
 func NewCPU(mu *memoryunit) cpu {
@@ -77,7 +77,6 @@ func (this *cpu) increment(x uint8) uint8 {
   return res
 }
 
-//DEC
 func (this *cpu) decrement(x uint8) uint8 {
   res := x - 1
   this.set_f_zero(res == 0)
@@ -118,7 +117,6 @@ func (this *cpu) res(i uint8, val uint8) uint8 {
   return val & ^uint8(1 << i)
 }
 
-//=ADC
 func (this *cpu) adc(a uint8, b uint8) uint8 {
   carr := int16(0)
   if(this.get_f_carry()) { carr = 1 }
@@ -131,7 +129,6 @@ func (this *cpu) adc(a uint8, b uint8) uint8 {
   return res
 }
 
-//=ADD
 func (this *cpu) add(a uint8, b uint8) uint8 {
   res_temp := int16(a) + int16(b)
   res := uint8(res_temp)
@@ -142,7 +139,6 @@ func (this *cpu) add(a uint8, b uint8) uint8 {
   return res
 }
 
-//=ADD 16
 func (this *cpu) add_16(a uint16 , b uint16) uint16 {
   res_temp := int32(a) + int32(b)
   this.set_f_subtr(false)
@@ -151,13 +147,11 @@ func (this *cpu) add_16(a uint16 , b uint16) uint16 {
   return uint16(res_temp)
 }
 
-//=RST
 func (this *cpu) restart(next uint16) {
   this.pushStack((*this).pc.value)
   (*this).pc.value = next
 }
 
-//=SUB
 func (this *cpu) subtract(a uint8, b uint8) uint8 {
   res_temp := int16(a) - int16(b)
   res := uint8(res_temp)
@@ -168,7 +162,6 @@ func (this *cpu) subtract(a uint8, b uint8) uint8 {
   return res
 }
 
-//=SBC
 func (this *cpu) subtract_carry(value uint8, a uint8) uint8 {
   carry := uint8(0)
   if((*this).get_f_carry()) {carry = uint8(1)}
@@ -182,7 +175,6 @@ func (this *cpu) subtract_carry(value uint8, a uint8) uint8 {
   return res_small
 }
 
-//=RL
 func (this *cpu) rotate_left(a uint8) uint8 {
   old_cy := uint8(0)
   if(this.get_f_carry()) { old_cy = uint8(1) }
@@ -199,7 +191,6 @@ func (this *cpu) rotate_left(a uint8) uint8 {
   return res
 }
 
-//=RLA
 func (this *cpu) rla(a uint8) uint8 {
   old_cy := uint8(0)
   if(this.get_f_carry()) { old_cy = uint8(1) }
@@ -212,7 +203,6 @@ func (this *cpu) rla(a uint8) uint8 {
   return res
 }
 
-//=RLC
 func (this *cpu) rlc(val uint8) uint8 {
   carry := 0 < val & (1 << 7)
   res := (val << 1)
@@ -226,7 +216,6 @@ func (this *cpu) rlc(val uint8) uint8 {
   return res
 }
 
-//=RRC
 func (this *cpu) rotate_right_carry(val uint8) uint8 {
   carry := val & 1
   res := (val >> 1) | (carry << 7)
@@ -237,7 +226,6 @@ func (this *cpu) rotate_right_carry(val uint8) uint8 {
   return res
 }
 
-//=RR
 func (this *cpu) rotate_right(val uint8) uint8 {
   carry := val & 1
   res := val >> 1
@@ -251,7 +239,6 @@ func (this *cpu) rotate_right(val uint8) uint8 {
   return res
 }
 
-//=OR
 func (this *cpu) or(a uint8, b uint8) uint8 {
   a |= b
   this.set_f_zero(a == 0)
@@ -261,7 +248,6 @@ func (this *cpu) or(a uint8, b uint8) uint8 {
   return a
 }
 
-//=AND
 func (this *cpu) and(a uint8, b uint8) uint8 {
   res := a & b
   this.set_f_zero(res == 0)
@@ -271,7 +257,6 @@ func (this *cpu) and(a uint8, b uint8) uint8 {
   return res
 }
 
-//=SRL
 func (this *cpu) srl(a uint8) uint8 {
   carr := a & uint8(1)
   res := a >> 1
@@ -282,7 +267,6 @@ func (this *cpu) srl(a uint8) uint8 {
   return res
 }
 
-//SLA
 func (this *cpu) shift_left_carry(val uint8) uint8 {
   new_cy := bool(0 < (val & (1 << 7)))
   res := uint8(val << 1)
@@ -293,7 +277,6 @@ func (this *cpu) shift_left_carry(val uint8) uint8 {
   return res
 }
 
-//SRA
 func (this *cpu) shift_right_carry(val uint8) uint8 {
   res := (val & 128) | (val >> 1)
   this.set_f_zero(res == 0)

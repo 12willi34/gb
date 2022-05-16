@@ -27,16 +27,16 @@ type io_controller struct {
 func NewIoController() io_controller {
   return io_controller {
     dirKeys: []key {
-      NewKey("right", 1073741903, 0),
-      NewKey("left", 1073741904, 1),
-      NewKey("up", 1073741906, 2),
-      NewKey("down", 1073741905, 3),
+      NewKey("right", in_right, 0),
+      NewKey("left", in_left, 1),
+      NewKey("up", in_up, 2),
+      NewKey("down", in_down, 3),
     },
     actionKeys: []key {
-      NewKey("A", 121, 0),
-      NewKey("B", 120, 1),
-      NewKey("select", 8, 2),
-      NewKey("start", 13, 3),
+      NewKey("A", in_A, 0),
+      NewKey("B", in_B, 1),
+      NewKey("select", in_select, 2),
+      NewKey("start", in_start, 3),
     },
     Direction: false,
     Action: false,

@@ -1286,11 +1286,7 @@ func JP_HL(this *cpu) int {
 }
 
 func STOP(this *cpu) int {
-  //(*this).Halt = true
-  println("STOP operation received")
-
-  //nächster wert wird ignoriert
-  (*this).fetch()
+  this.fetch()
   return 4
 }
 

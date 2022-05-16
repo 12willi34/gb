@@ -1,9 +1,5 @@
 package gb
 
-import (
-  //"fmt"
-)
-
 func SWAP_B(this *cpu) int {
   (*this).bc.w_high(this.swap((*this).bc.r_high()))
   return 8
