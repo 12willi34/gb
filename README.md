@@ -2,7 +2,7 @@
 Simple emulator for the original GameBoy written in golang,  
 compatible with most GameBoy games.  
 
-![](doc/demo.png)
+![](doc/demo.png | width=150)
 
 ## Prerequisites
  - golang: https://go.dev
