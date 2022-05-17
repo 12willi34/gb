@@ -1,5 +1,4 @@
 *.swp
-main.go
 debug.go
 rom/*
 boot/*
