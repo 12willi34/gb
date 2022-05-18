@@ -1,11 +1,11 @@
 # SimpleGB
-Simple emulator for the original GameBoy written in golang,  
+Simple emulator for the original GameBoy written in go,  
 compatible with most GameBoy games.  
 
 <img src="doc/demo.png" width="250">
 
 ## Prerequisites
- - golang: https://go.dev
+ - go: https://go.dev
  - sdl: https://www.libsdl.com
 
 ## run a game
